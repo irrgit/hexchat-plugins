@@ -1,6 +1,4 @@
-
-
-__module_name__ = "hexchat-oper"
+__module_name__ = "hexchat-xline"
 __module_version__ = "1.1"
 __module_description__ = "Ban/akill/shun user by copying their nickname and pressing a hotkey."
 import os
@@ -8,8 +6,7 @@ import hexchat
 if os.name =="posix":
 	import pyperclip
 elif os.name == "nt":
-	import ctypes
-	
+	import ctypes	
 else:
 	raise Exception("Unknown/unsupported OS")
 
@@ -78,8 +75,6 @@ def xline_cb(word,word_eol, _):
 	global numerics
 	xline_nick = None
 	xline_timer_handle = None
-
-
 	xline_hooks = []
 
 	#get the nickname from the clipboard
@@ -96,28 +91,21 @@ def xline_cb(word,word_eol, _):
 	def xline_unhook():
 		for hook in xline_hooks:
 			hexchat.unhook(hook)
-
 		hexchat.unhook(xline_timer_handle)
 		
 
 	def xline_notice_cb(word, word_eol, _):
-
 		if word[1] == '378':
 			connecting_ip =  str(word[8])
 			if(connecting_ip  not in str (EXCLUDE_LIST)):
-				hexchat.command("os akill add %s *@%s %s" % (akill_time,str(connecting_ip),akill_reason))
-				
+				hexchat.command("os akill add %s *@%s %s" % (akill_time,str(connecting_ip),akill_reason))			
 
 		return hexchat.EAT_ALL	
 
-
 	def xline_timeout_cb(_):
-
 		xline_unhook()
 
-
-	xline_hooks = [hexchat.hook_server(numeric, xline_notice_cb) for numeric in numerics]
-	
+	xline_hooks = [hexchat.hook_server(numeric, xline_notice_cb) for numeric in numerics]	
 	xline_timer_handle = hexchat.hook_timer(1000, xline_timeout_cb)
 
 	return hexchat.EAT_ALL
@@ -127,8 +115,6 @@ def xshun_cb(word,word_eol, _):
 	global numerics
 	xshun_timer_handle = None
 	xshun_nick = None
-	#IRC protocol reply numerics on whois. Some are missing.
-
 	xshun_hooks = []
 
 	#get the nickname from the clipboard
@@ -146,12 +132,9 @@ def xshun_cb(word,word_eol, _):
 	def xshun_unhook():
 		for hook in xshun_hooks:
 			hexchat.unhook(hook)
-
-		hexchat.unhook(xshun_timer_handle)
-		
+		hexchat.unhook(xshun_timer_handle)		
 
 	def xshun_notice_cb(word, word_eol, _):
-
 		if word[1] == '378':
 			connecting_ip =  str(word[8])
 			if(connecting_ip  not in str (EXCLUDE_LIST)):
@@ -161,19 +144,14 @@ def xshun_cb(word,word_eol, _):
 
 
 	def xshun_timeout_cb(_):
-
 		xshun_unhook()
 
-
-	xshun_hooks = [hexchat.hook_server(numeric, xshun_notice_cb) for numeric in numerics]
-	
+	xshun_hooks = [hexchat.hook_server(numeric, xshun_notice_cb) for numeric in numerics]	
 	xshun_timer_handle = hexchat.hook_timer(1000, xshun_timeout_cb)
 
 	return hexchat.EAT_ALL		
 
 
 hexchat.hook_command("xshun", xshun_cb, help="/xshun <nick> , Shuns user from the server.")
-
 hexchat.hook_command("xline", xline_cb, help="/xline <nick> , Akills user from the server.")
-
 print(__module_version__ + " version " + __module_name__ + " loaded.")
