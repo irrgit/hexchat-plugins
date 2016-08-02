@@ -1,6 +1,6 @@
 
 
-__module_name__ = "hexchat-xline"
+__module_name__ = "hexchat-oper"
 __module_version__ = "1.1"
 __module_description__ = "Ban/akill/shun user by copying their nickname and pressing a hotkey."
 import os
@@ -16,7 +16,7 @@ else:
 #should move these to a config file on next release
 shun_time ='5m'
 shun_reason ='Pushim'
-akill_time = '2d' #2 days
+akill_time = '+2d' #2 days
 akill_reason ='Proxy/Ofendime/Flood/Abuse'
 
 #below are mibbit and irccloud IPs to exclude from bans
