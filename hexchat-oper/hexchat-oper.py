@@ -1,18 +1,23 @@
-__module_name__ = "hexchat-oper"
+
+
+__module_name__ = "hexchat-xline"
 __module_version__ = "1.1"
 __module_description__ = "Ban/akill/shun user by copying their nickname and pressing a hotkey."
-
+import os
 import hexchat
-try:
+if os.name =="posix":
 	import pyperclip
-except:
-	print("Pyperclip is not installed")
+elif os.name == "nt":
+	import ctypes
+	
+else:
+	raise Exception("Unknown/unsupported OS")
 
 #should move these to a config file on next release
 shun_time ='5m'
 shun_reason ='Pushim'
 akill_time = '2d' #2 days
-
+akill_reason ='Proxy/Ofendime/Flood/Abuse'
 
 #below are mibbit and irccloud IPs to exclude from bans
 #this list could be  dynamically added from a separate file if needed
@@ -45,17 +50,44 @@ numerics = [
 "320"
 ]
 
+## Windows get clipboard function
+def getclip():
+	CF_TEXT = 1
+	kernel32 = ctypes.windll.kernel32
+	user32 = ctypes.windll.user32
+	ret = None
+	user32.OpenClipboard(0)
+	if user32.IsClipboardFormatAvailable(CF_TEXT):
+	    data = user32.GetClipboardData(CF_TEXT)
+	    data_locked = kernel32.GlobalLock(data)
+	    text = ctypes.c_char_p(data_locked)
+	    ret = text.value
+	    kernel32.GlobalUnlock(data_locked)
+	else:
+	    print('no text in clipboard')
+	user32.CloseClipboard()
+	return ret
+#################################
+
+
+
+
+
 #main function to hook a button to a command, its parameter is fetched from the clipboard
 def xline_cb(word,word_eol, _):
 	global numerics
-
+	xline_nick = None
 	xline_timer_handle = None
 
 
 	xline_hooks = []
 
 	#get the nickname from the clipboard
-	xline_nick = pyperclip.paste()
+	if os.name =="posix":
+		xline_nick = pyperclip.paste()
+
+	if os.name =="nt":
+		xline_nick = getclip()
 
 	#issue whois on nickname
 	hexchat.command("whois " + str(xline_nick))
@@ -73,7 +105,8 @@ def xline_cb(word,word_eol, _):
 		if word[1] == '378':
 			connecting_ip =  str(word[8])
 			if(connecting_ip  not in str (EXCLUDE_LIST)):
-				print ("os akill "+ str(connecting_ip))
+				hexchat.command("os akill add %s *@%s %s" % (akill_time,str(connecting_ip),akill_reason))
+				
 
 		return hexchat.EAT_ALL	
 
@@ -93,13 +126,18 @@ def xline_cb(word,word_eol, _):
 def xshun_cb(word,word_eol, _):
 	global numerics
 	xshun_timer_handle = None
-
+	xshun_nick = None
 	#IRC protocol reply numerics on whois. Some are missing.
 
 	xshun_hooks = []
 
 	#get the nickname from the clipboard
-	xshun_nick = pyperclip.paste()
+	if os.name =="posix":
+		xshun_nick = pyperclip.paste()
+
+	if os.name =="nt":
+		xshun_nick = getclip()
+		
 
 	#issue whois on nickname
 	hexchat.command("whois " + str(xshun_nick))
