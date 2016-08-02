@@ -4,5 +4,5 @@ To install simply place in your addons folder.
 Before loading make sure to install <b>pyperclip</b>.  
 
 On Linux:  
-    <b>$ sudo pip install pyperclip</b>
+        <b>$ sudo pip install pyperclip</b>
 
