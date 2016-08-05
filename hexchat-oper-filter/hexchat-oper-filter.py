@@ -1,8 +1,14 @@
-import hexchat
-
 __module_name__ = "oper-oper-filter"
 __module_version__ = "1.1"
 __module_description__ = "Filter server notices to separate tabs."
+
+import hexchat
+import os
+osname = os.name
+import thread
+
+
+
 
 
 #these will be the network tabs to print to.
@@ -33,13 +39,22 @@ network_contexts =[hexchat.find_context(tab) for tab in TABS]
 
 
 def parse_notice(notice):
-	print ("in parse_notice()")
-	#to do here
-	#multithreaded function that feteches a notice and displays it where its needed
+	
+	blue ='\00323'
+	gray = '\00331'
+	connected = blue + 'Connected'
+	conn_tab = hexchat.find_context(r'{CONNECTIONS}')
+	conn_tab.emit_print("Channel Message", connected, str(notice))
 
 
-def server_notice(word, word_eol, userdata):
-	for network in network_contexts:
-		network.emit_print("Channel Message", "RandomNick", "Random Chan Message")
+# def server_notice(word, word_eol, userdata):
+# 	for network in network_contexts:
+# 		network.emit_print("Channel Message", "RandomNick", "Random Chan Message")
 
-hexchat.hook_command('testprint', server_notice)
+def on_server_notice(word, word_eol, userdata):
+	notice = str(word[0])
+	if 'Client connecting' in notice:
+		thread.start_new_thread(parse_notice,(notice,))
+
+
+hexchat.hook_print("Server Notice", on_server_notice)
