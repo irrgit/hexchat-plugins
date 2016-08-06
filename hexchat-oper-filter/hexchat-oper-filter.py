@@ -9,7 +9,19 @@ import thread
 
 
 
+text =  {
+	'blue': '\00318',
+	'green': '\00319',
+	'red': '\00320',
+	'brown': '\00321',
+	'purple': '\00322',
+	'orange': '\00323',
+	'lightgreen': '\00325',
+	'gray': '\00330',
+	'bold':'\002',
+	'underline':'\037'
 
+}
 
 #these will be the network tabs to print to.
 TABS = [
@@ -40,9 +52,8 @@ network_contexts =[hexchat.find_context(tab) for tab in TABS]
 
 def parse_notice(notice):
 	
-	blue ='\00323'
-	gray = '\00331'
-	connected = blue + 'Connected'
+
+	connected = text['green']+ 'Connected'
 	conn_tab = hexchat.find_context(r'{CONNECTIONS}')
 	conn_tab.emit_print("Channel Message", connected, str(notice))
 
