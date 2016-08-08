@@ -45,7 +45,7 @@ def on_join(word, word_eol, event,attr):
 				chan_context = hexchat.find_context(channel=chan)
 				country_name = str(data['country_name'])
 				country_code = str(data['country_code'])
-				location = ident +" "+ ip +" "+ country_name +"/"+country_code
+				location = ident +" "+ ip +" "+ "\00320"+country_name +"/"+country_code
 				edited = True
 				chan_context.emit_print("Join", nick_cb, chan, location)
 				edited = False
