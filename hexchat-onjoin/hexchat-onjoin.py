@@ -16,6 +16,8 @@ def on_join(word, word_eol, event,attr):
 		return
 	nick = word[0]
 	chan = word[1]
+	ident = str(re.findall(r"(.*)\@",word[2]))
+	ident = ident[2:-2]		
 	userip_hook = None
 	timer_handle = None
 	hexchat.command("USERIP "+ nick)
@@ -27,6 +29,7 @@ def on_join(word, word_eol, event,attr):
 	def userip_cp(word, word_eol, _):
 		global edited
 		unhook()	
+
 		nick_cb = str(re.findall(r"\:(.*)\=", str(word[3])))
 		nick_cb = nick_cb[2:-2]
 		if(word[1] == '340' and nick == nick_cb):
@@ -42,7 +45,7 @@ def on_join(word, word_eol, event,attr):
 				chan_context = hexchat.find_context(channel=chan)
 				country_name = str(data['country_name'])
 				country_code = str(data['country_code'])
-				location = ip +" "+ country_name +"/"+country_code
+				location = ident +" "+ ip +" "+ country_name +"/"+country_code
 				edited = True
 				chan_context.emit_print("Join", nick_cb, chan, location)
 				edited = False
@@ -60,4 +63,4 @@ def on_join(word, word_eol, event,attr):
 
 hexchat.hook_print_attrs("Join", on_join,"Join",priority=hexchat.PRI_HIGH)
 
-print "Loaded"
+print(__module_name__ +" version " + __module_version__ +" loaded.")
