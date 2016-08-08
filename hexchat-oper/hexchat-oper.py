@@ -14,6 +14,7 @@ import urllib.request
 import json
 json_api_website = 'http://freegeoip.net/json/'
 
+#Basically dont touch this one. 
 edited = False
 
 #should move these to a config file on next release
@@ -71,10 +72,6 @@ def getclip():
 	user32.CloseClipboard()
 	return ret
 #################################
-
-
-
-
 
 #main function to hook a button to a command, its parameter is fetched from the clipboard
 def xline_cb(word,word_eol, _):
@@ -161,8 +158,13 @@ def xshun_cb(word,word_eol, _):
 	xshun_timer_handle = hexchat.hook_timer(1000, xshun_timeout_cb)
 
 	return hexchat.EAT_ALL		
-############################################################################3
+############################################################################
+
+# below funciton is modeled after the following plugin by TingPing
+# https://github.com/TingPing/plugins/blob/master/HexChat/duplicates/wordhl.py
+# Its a bit more complex but they important parts are  line 14, line 19 and 28-31 
 def on_join(word, word_eol, event,attr):
+	# basically used as a lock as far as i understand it
 	global edited
 	if edited or attr.time or not len(word) > 1:
 		return
@@ -172,14 +174,19 @@ def on_join(word, word_eol, event,attr):
 	ident = ident[2:-2]		
 	userip_hook = None
 	timer_handle = None
+	# after getting the nickname issue a /userip on that nick
 	hexchat.command("USERIP "+ nick)
 
+	# function to unhook our hooks
 	def unhook():
 		hexchat.unhook(userip_hook)
 		hexchat.unhook(timer_handle)
 
 	def userip_cp(word, word_eol, _):
 		global edited
+
+		# unhook as soon as we recieve the server notice, not sure if i should check
+		# that its the '340' one
 		unhook()	
 
 		nick_cb = str(re.findall(r"\:(.*)\=", str(word[3])))
@@ -192,7 +199,7 @@ def on_join(word, word_eol, event,attr):
 			ip = ip[2:-2]
 			request_url = json_api_website + ip
 
-			
+			# would be nice to have the below code block in a thread to eliminate hangs
 			response = urllib.request.urlopen(request_url).read().decode('utf-8')
 			data = json.loads(response)
 			chan_context = hexchat.find_context(channel=chan)
@@ -202,6 +209,7 @@ def on_join(word, word_eol, event,attr):
 			edited = True
 			chan_context.emit_print("Join", nick_cb, chan, location)
 			edited = False
+			#munch munch on the event to avoid infinite loop
 			return hexchat.EAT_ALL
 	
 				
