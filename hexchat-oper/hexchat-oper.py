@@ -10,7 +10,7 @@ elif os.name == "nt":
 else:
 	raise Exception("Unknown/unsupported OS")
 import re
-import urllib2
+import urllib.request
 import json
 json_api_website = 'http://freegeoip.net/json/'
 
@@ -90,6 +90,10 @@ def xline_cb(word,word_eol, _):
 	if os.name =="nt":
 		xline_nick = getclip()
 
+	xline_nick = str(xline_nick)
+	xline_nick = xline_nick[2:-1]
+
+
 	#issue whois on nickname
 	hexchat.command("whois " + str(xline_nick))
 
@@ -130,7 +134,8 @@ def xshun_cb(word,word_eol, _):
 	if os.name =="nt":
 		xshun_nick = getclip()
 		
-
+	xshun_nick = str(xshun_nick)
+	xshun_nick = xshun_nick[2:-1]
 	#issue whois on nickname
 	hexchat.command("whois " + str(xshun_nick))
 
@@ -179,6 +184,7 @@ def on_join(word, word_eol, event,attr):
 
 		nick_cb = str(re.findall(r"\:(.*)\=", str(word[3])))
 		nick_cb = nick_cb[2:-2]
+
 		if(word[1] == '340' and nick == nick_cb):
 
 			ip = str(word[3])
@@ -186,19 +192,18 @@ def on_join(word, word_eol, event,attr):
 			ip = ip[2:-2]
 			request_url = json_api_website + ip
 
-			try:
-				response = urllib2.urlopen(request_url)
-				data = json.load(response)
-				chan_context = hexchat.find_context(channel=chan)
-				country_name = str(data['country_name'])
-				country_code = str(data['country_code'])
-				location = ident +" "+ ip +" "+ country_name +"/"+country_code
-				edited = True
-				chan_context.emit_print("Join", nick_cb, chan, location)
-				edited = False
-				return hexchat.EAT_ALL
-			except:
-				pass		
+			
+			response = urllib.request.urlopen(request_url).read().decode('utf-8')
+			data = json.loads(response)
+			chan_context = hexchat.find_context(channel=chan)
+			country_name = str(data['country_name'])
+			country_code = str(data['country_code'])
+			location = ident +" "+ ip +" "+ country_name +"/"+country_code
+			edited = True
+			chan_context.emit_print("Join", nick_cb, chan, location)
+			edited = False
+			return hexchat.EAT_ALL
+	
 				
 
 	def onjoin_timeout_cb(_):
