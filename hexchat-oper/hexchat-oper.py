@@ -162,7 +162,7 @@ def xshun_cb(word,word_eol, _):
 
 # below funciton is modeled after the following plugin by TingPing
 # https://github.com/TingPing/plugins/blob/master/HexChat/duplicates/wordhl.py
-# Its a bit more complex but they important parts are  line 14, line 19 and 28-31 
+# The important parts are  line 14, line 19 and 28-31 
 def on_join(word, word_eol, event,attr):
 	# basically used as a lock as far as i understand it
 	global edited
