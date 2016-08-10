@@ -22,14 +22,13 @@ shun_time ='5m'
 shun_reason ='Pushim'
 akill_time = '+2d' #2 days
 akill_reason ='Proxy/Ofendime/Flood/Abuse'
+ipintel_email = ''
+#on windows use raw strings for path
+exempt_file_path = r''
 
 #below are mibbit and irccloud IPs to exclude from bans
 #this list could be  dynamically added from a separate file if needed
-EXCLUDE_LIST = [
-'109.169.29.95'	, 
-'207.192.75.252', 
-'64.62.228.82'  , 
-'78.129.202.38' ,
+IRCCLOUD = [
 '192.184.9.108'	,
 '192.184.9.110'	,
 '192.184.9.112'	,
