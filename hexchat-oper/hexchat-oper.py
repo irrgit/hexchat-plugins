@@ -256,6 +256,8 @@ def on_join(word, word_eol, event,attr):
 				geoip_response = urllib.request.urlopen(geoip_request_url).read().decode('utf-8')
 				ipintel_request_url = ipintel_api_link + ip + ipintel_email + ipintel_flags
 				ipintel_response = urllib.request.urlopen(ipintel_request_url).read().decode('utf-8')
+				if (ipintel_response.status_code != 200) or (int(ipintel_response.content) < 0):
+					print("Error, remove this and just pass.")
 				proxy = ''
 				if (str(ipintel_response) == '1'):
 					proxy = 'Proxy'
