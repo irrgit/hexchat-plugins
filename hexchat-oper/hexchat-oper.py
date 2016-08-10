@@ -89,7 +89,6 @@ def xline_cb(word,word_eol, _):
 	xline_nick = str(xline_nick)
 	xline_nick = xline_nick[2:-1]
 
-
 	#issue whois on nickname
 	hexchat.command("whois " + str(xline_nick))
 
@@ -97,8 +96,7 @@ def xline_cb(word,word_eol, _):
 	def xline_unhook():
 		for hook in xline_hooks:
 			hexchat.unhook(hook)
-		hexchat.unhook(xline_timer_handle)
-		
+		hexchat.unhook(xline_timer_handle)		
 
 	def xline_notice_cb(word, word_eol, _):
 		if word[1] == '378':
@@ -149,7 +147,6 @@ def xshun_cb(word,word_eol, _):
 
 		return hexchat.EAT_ALL	
 
-
 	def xshun_timeout_cb(_):
 		xshun_unhook()
 
@@ -195,21 +192,32 @@ def on_join(word, word_eol, event,attr):
 
 			ip = str(word[3])
 			ip = str(re.findall(r"\@(.*)",ip))
+			print("Ip is :"+ ip)
 			ip = ip[2:-2]
-			request_url = json_api_website + ip
 
-			# would be nice to have the below code block in a thread to eliminate hangs
-			response = urllib.request.urlopen(request_url).read().decode('utf-8')
-			data = json.loads(response)
-			chan_context = hexchat.find_context(channel=chan)
-			country_name = str(data['country_name'])
-			country_code = str(data['country_code'])
-			location = ident +" "+ ip +" "+ country_name +"/"+country_code
-			edited = True
-			chan_context.emit_print("Join", nick_cb, chan, location)
-			edited = False
-			#munch munch on the event to avoid infinite loop
-			return hexchat.EAT_ALL
+			if (ip == '<unknown>'):
+				print("Its a bot")
+
+			elif (ip in IRCCLOUD):
+				print("Its IRCCLOUD")
+
+			elif (ip in exempt_list):				
+				print("In exempt list")
+
+			else:
+				request_url = json_api_website + ip
+				# would be nice to have the below code block in a thread to eliminate hangs
+				response = urllib.request.urlopen(request_url).read().decode('utf-8')
+				data = json.loads(response)
+				chan_context = hexchat.find_context(channel=chan)
+				country_name = str(data['country_name'])
+				country_code = str(data['country_code'])
+				location = ident +" "+ ip +" "+ country_name +"/"+country_code
+				edited = True
+				chan_context.emit_print("Join", nick_cb, chan, location)
+				edited = False
+				#munch munch on the event to avoid infinite loop
+				return hexchat.EAT_ALL
 	
 				
 
