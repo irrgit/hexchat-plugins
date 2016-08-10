@@ -238,7 +238,7 @@ def on_join(word, word_eol, event,attr):
 				data = json.loads(response)
 				country_name = str(data['country_name'])
 				country_code = str(data['country_code'])
-				location = " "+ident +" "+ ip +" "+ country_name +"/"+ country_code + "\00323Exempt"
+				location = " "+ident +" "+ ip +" "+ country_name +"/"+ country_code + " "+ "\00320Exempt"
 				edited = True
 				chan_context.emit_print("Join", nick_cb, chan, location)
 				edited = False
