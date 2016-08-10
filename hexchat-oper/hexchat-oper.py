@@ -24,7 +24,8 @@ akill_time = '+2d' #2 days
 akill_reason ='Proxy/Ofendime/Flood/Abuse'
 ipintel_email = ''
 #on windows use raw strings for path
-exempt_file_path = r''
+exempt_file_path = r'C:\Users\test\Desktop\ipfile.txt'
+print exempt_file_path
 
 #below are mibbit and irccloud IPs to exclude from bans
 #this list could be  dynamically added from a separate file if needed
@@ -203,14 +204,17 @@ def on_join(word, word_eol, event,attr):
 				edited = True
 				chan_context.emit_print("Join", nick_cb, chan, location)
 				edited = False
+
 				return hexchat.EAT_ALL				
 
 			elif (ip in IRCCLOUD):
 				chan_context = hexchat.find_context(channel=chan)
-				location = ident +" IRCCLOUD USER"
+				location = " "+ ident +" "+ "irccloud"
 				edited = True
 				chan_context.emit_print("Join", nick_cb, chan, location)
 				edited = False
+
+				return hexchat.EAT_ALL
 
 
 			elif (ip in exempt_list):				
