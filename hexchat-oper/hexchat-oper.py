@@ -66,7 +66,7 @@ def load_exempt_ips():
 			if '.' in line:
 				ip = line.rstrip()
 				exempt_list.append(ip)
-	print exempt_list
+	
 load_exempt_ips()
 
 # Windows get clipboard function
