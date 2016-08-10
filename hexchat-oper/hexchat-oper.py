@@ -32,9 +32,6 @@ ipintel_api_link = 'http://check.getipintel.net/check.php?ip='
 # on windows use raw strings for path
 # Below is the path where the IP file is located, dont remove the r' in front!
 exempt_file_path = r'C:\Users\test\Desktop\ipfile.txt'
-
-
-
 #below are mibbit and irccloud IPs to exclude from bans
 #this list could be  dynamically added from a separate file if needed
 
@@ -210,27 +207,7 @@ def print_later_proxy(nick,chan_context,ip,ident,nick_cb,chan):
 	edited = True
 	chan_context.emit_print("Join", nick_cb, chan, location)
 	edited = False
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ###########################################################################
-
-
 # below funciton is modeled after the following plugin by TingPing
 # https://github.com/TingPing/plugins/blob/master/HexChat/duplicates/wordhl.py
 # The important parts are  line 14, line 19 and 28-31 
