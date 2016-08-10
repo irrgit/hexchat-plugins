@@ -256,13 +256,15 @@ def on_join(word, word_eol, event,attr):
 				geoip_response = urllib.request.urlopen(geoip_request_url).read().decode('utf-8')
 				ipintel_request_url = ipintel_api_link + ip + ipintel_email + ipintel_flags
 				ipintel_response = urllib.request.urlopen(ipintel_request_url).read().decode('utf-8')
-				print (ipintel_response)
+				proxy = ''
+				if (str(ipintel_response) == '1'):
+					proxy = 'Proxy'
 
 				data = json.loads(geoip_response)
 				chan_context = hexchat.find_context(channel=chan)
 				country_name = str(data['country_name'])
 				country_code = str(data['country_code'])
-				location = " "+ident +" "+ ip +" "+ country_name +"/"+country_code
+				location = " "+ident +" "+ ip +" "+ country_name +"/"+country_code +" "+ "\00320"+proxy
 				edited = True
 				chan_context.emit_print("Join", nick_cb, chan, location)
 				edited = False
