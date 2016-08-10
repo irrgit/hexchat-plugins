@@ -255,12 +255,15 @@ def on_join(word, word_eol, event,attr):
 				# would be nice to have the below code block in a thread to eliminate hangs
 				geoip_response = urllib.request.urlopen(geoip_request_url).read().decode('utf-8')
 				ipintel_request_url = ipintel_api_link + ip + ipintel_email + ipintel_flags
-				ipintel_response = urllib.request.urlopen(ipintel_request_url).read().decode('utf-8')
+				# ipintel_response = urllib.request.urlopen(ipintel_request_url).read().decode('utf-8')
+				ipintel_response = urllib.request.urlopen(ipintel_request_url)
+				proxy = ''
 				if (ipintel_response.status_code != 200) or (int(ipintel_response.content) < 0):
 					print("Error, remove this and just pass.")
-				proxy = ''
-				if (str(ipintel_response) == '1'):
-					proxy = 'Proxy'
+				else:
+					ipintel_response = ipintel_response.read().decode('utf-8')
+					if (str(ipintel_response) == '1'):
+						proxy = 'Proxy'
 
 				data = json.loads(geoip_response)
 				chan_context = hexchat.find_context(channel=chan)
