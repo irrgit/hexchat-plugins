@@ -64,6 +64,8 @@ numerics = [
 exempt_list = []
 def load_exempt_ips():
 	global exempt_list
+	#empty the list
+	exempt_list[:] = []
 	with open(exempt_file_path) as f:
 		for line in f:
 			if '.' in line:
