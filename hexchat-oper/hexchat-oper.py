@@ -194,8 +194,7 @@ def print_later_proxy(nick,chan_context,ip,ident,nick_cb,chan):
 	global edited
 	geoip_request_url = json_api_website + ip
 	geoip_response = urllib.request.urlopen(geoip_request_url).read().decode('utf-8')
-	ipintel_request_url = ipintel_api_link + ip + ipintel_email + ipintel_flags		
-	
+	ipintel_request_url = ipintel_api_link + ip + ipintel_email + ipintel_flags			
 	proxy = ''
 	try:
 		ipintel_response = urllib.request.urlopen(ipintel_request_url).read().decode('utf-8')					
@@ -203,8 +202,6 @@ def print_later_proxy(nick,chan_context,ip,ident,nick_cb,chan):
 			proxy = 'Proxy'
 	except HTTPError:
 		proxy =''
-
-
 	data = json.loads(geoip_response)
 	chan_context = hexchat.find_context(channel=chan)
 	country_name = str(data['country_name'])
