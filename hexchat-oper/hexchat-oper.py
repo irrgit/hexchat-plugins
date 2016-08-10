@@ -25,7 +25,8 @@ akill_reason ='Proxy/Ofendime/Flood/Abuse'
 ipintel_email = ''
 #on windows use raw strings for path
 exempt_file_path = r'C:\Users\test\Desktop\ipfile.txt'
-print exempt_file_path
+print (exempt_file_path)
+
 
 #below are mibbit and irccloud IPs to exclude from bans
 #this list could be  dynamically added from a separate file if needed
@@ -55,7 +56,18 @@ numerics = [
 "320"
 ]
 
-## Windows get clipboard function
+###############Config#################
+def load_exempt_ips():
+	global exempt_list
+	with open(exempt_file_path) as f:
+		for line in f:
+			if '.' in line:
+				ip = line.rstrip()
+				exempt_list.append(ip)
+	print exempt_list
+load_exempt_ips()
+
+# Windows get clipboard function
 def getclip():
 	CF_TEXT = 1
 	kernel32 = ctypes.windll.kernel32
@@ -72,9 +84,9 @@ def getclip():
 	    print('no text in clipboard')
 	user32.CloseClipboard()
 	return ret
-#################################
 
-#main function to hook a button to a command, its parameter is fetched from the clipboard
+
+# function to hook a button to a command, its parameter is fetched from the clipboard
 def xline_cb(word,word_eol, _):
 	global numerics
 	xline_nick = None
@@ -247,4 +259,5 @@ def on_join(word, word_eol, event,attr):
 hexchat.hook_print_attrs("Join", on_join,"Join",priority=hexchat.PRI_HIGH)
 hexchat.hook_command("xshun", xshun_cb, help="/xshun <nick> , Shuns user from the server.")
 hexchat.hook_command("xline", xline_cb, help="/xline <nick> , Akills user from the server.")
+hexchat.hook_command("xload", load_exempt_ips, help="Reloads exempt IP file")
 print(__module_version__ + " version " + __module_name__ + " loaded.")
