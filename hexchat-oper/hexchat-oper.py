@@ -28,6 +28,7 @@ exempt_file_path = r''
 
 #below are mibbit and irccloud IPs to exclude from bans
 #this list could be  dynamically added from a separate file if needed
+exempt_list = []
 IRCCLOUD = [
 '192.184.9.108'	,
 '192.184.9.110'	,
@@ -185,12 +186,14 @@ def on_join(word, word_eol, event,attr):
 		# that its the '340' one
 		unhook()	
 
-		nick_cb = str(re.findall(r"\:(.*)\=", str(word[3])))
+		nick_cb = str(re.findall(r"\:(.*)[\*\=]", str(word[3])))
 		nick_cb = nick_cb[2:-2]
 
 		if(word[1] == '340' and nick == nick_cb):
 
+
 			ip = str(word[3])
+			print("Word is"+ ip)
 			ip = str(re.findall(r"\@(.*)",ip))
 			print("Ip is :"+ ip)
 			ip = ip[2:-2]
