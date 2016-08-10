@@ -22,7 +22,11 @@ shun_time ='5m'
 shun_reason ='Pushim'
 akill_time = '+2d' #2 days
 akill_reason ='Proxy/Ofendime/Flood/Abuse'
-ipintel_email = ''
+
+ipintel_email = '&contact=irrgit@gmail.com'
+ipintel_flags = '&flags=m'
+ipintel_api_link = 'http://check.getipintel.net/check.php?ip='
+
 # on windows use raw strings for path
 # Below is the path where the IP file is located, dont remove the r' in front!
 exempt_file_path = r'C:\Users\test\Desktop\ipfile.txt'
@@ -247,10 +251,14 @@ def on_join(word, word_eol, event,attr):
 				
 
 			else:
-				request_url = json_api_website + ip
+				geoip_request_url = json_api_website + ip
 				# would be nice to have the below code block in a thread to eliminate hangs
-				response = urllib.request.urlopen(request_url).read().decode('utf-8')
-				data = json.loads(response)
+				geoip_response = urllib.request.urlopen(geoip_request_url).read().decode('utf-8')
+				ipintel_request_url = ipintel_api_link + ip + ipintel_email + ipintel_flags
+				ipintel_response = urllib.request.urlopen(request_url).read().decode('utf-8')
+				print (ipintel_response)
+
+				data = json.loads(geoip_response)
 				chan_context = hexchat.find_context(channel=chan)
 				country_name = str(data['country_name'])
 				country_code = str(data['country_code'])
