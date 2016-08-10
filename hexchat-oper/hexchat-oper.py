@@ -23,14 +23,15 @@ shun_reason ='Pushim'
 akill_time = '+2d' #2 days
 akill_reason ='Proxy/Ofendime/Flood/Abuse'
 ipintel_email = ''
-#on windows use raw strings for path
+# on windows use raw strings for path
+# Below is the path where the IP file is located, dont remove the r' in front!
 exempt_file_path = r'C:\Users\test\Desktop\ipfile.txt'
-print (exempt_file_path)
+
 
 
 #below are mibbit and irccloud IPs to exclude from bans
 #this list could be  dynamically added from a separate file if needed
-exempt_list = []
+
 IRCCLOUD = [
 '192.184.9.108'	,
 '192.184.9.110'	,
@@ -57,6 +58,7 @@ numerics = [
 ]
 
 ###############Config#################
+exempt_list = []
 def load_exempt_ips():
 	global exempt_list
 	with open(exempt_file_path) as f:
@@ -229,8 +231,20 @@ def on_join(word, word_eol, event,attr):
 				return hexchat.EAT_ALL
 
 
-			elif (ip in exempt_list):				
-				print("In exempt list")
+			elif (ip in exempt_list):
+				chan_context = hexchat.find_context(channel=chan)
+				request_url = json_api_website + ip
+				response = urllib.request.urlopen(request_url).read().decode('utf-8')
+				data = json.loads(response)
+				country_name = str(data['country_name'])
+				country_code = str(data['country_code'])
+				location = " "+ident +" "+ ip +" "+ country_name +"/"+ country_code + "\00323Exempt"
+				edited = True
+				chan_context.emit_print("Join", nick_cb, chan, location)
+				edited = False
+				return hexchat.EAT_ALL
+
+				
 
 			else:
 				request_url = json_api_website + ip
