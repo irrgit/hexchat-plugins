@@ -185,8 +185,8 @@ def on_join(word, word_eol, event,attr):
 		# unhook as soon as we recieve the server notice, not sure if i should check
 		# that its the '340' one
 		unhook()	
-
-		nick_cb = str(re.findall(r"\:(.*)[\*\=]", str(word[3])))
+		#below regex captures the nicks from userip replies even if theyre bots and have * appended to them
+		nick_cb = str(re.findall(r":([^*=]+)", str(word[3])))
 		nick_cb = nick_cb[2:-2]
 
 		if(word[1] == '340' and nick == nick_cb):
