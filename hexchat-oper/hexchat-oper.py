@@ -259,12 +259,11 @@ def on_join(word, word_eol, event,attr):
 				ipintel_response = urllib.request.urlopen(ipintel_request_url)
 				proxy = ''
 				try:
-					ipintel_response = urllib.request.urlopen(ipintel_request_url).read().decode('utf-8')
-					ipintel_response = ipintel_response.read().decode('utf-8')
+					ipintel_response = urllib.request.urlopen(ipintel_request_url).read().decode('utf-8')					
 					if (str(ipintel_response) == '1'):
 						proxy = 'Proxy'
 				except:
-					proxy ='NoInfo'
+					proxy =''
 
 
 				data = json.loads(geoip_response)
