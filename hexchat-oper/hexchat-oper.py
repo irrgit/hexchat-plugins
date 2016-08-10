@@ -3,6 +3,7 @@ __module_version__ = "1.1"
 __module_description__ = "Ban/akill/shun user by copying their nickname and pressing a hotkey."
 import os
 import hexchat
+import threading
 if os.name =="posix":
 	import pyperclip
 elif os.name == "nt":
@@ -175,6 +176,38 @@ def xshun_cb(word,word_eol, _):
 
 	return hexchat.EAT_ALL		
 ############################################################################
+def print_later(nick,chan_context,ip):
+	global edited
+	
+	request_url = json_api_website + ip
+	response = urllib.request.urlopen(request_url).read().decode('utf-8')
+	data = json.loads(response)
+	country_name = str(data['country_name'])
+	country_code = str(data['country_code'])
+	location = " "+ident +" "+ ip +" "+ country_name +"/"+ country_code + " "+ "\00320Exempt"
+	edited = True
+	chan_context.emit_print("Join", nick_cb, chan, location)
+	edited = False
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+###########################################################################
+
 
 # below funciton is modeled after the following plugin by TingPing
 # https://github.com/TingPing/plugins/blob/master/HexChat/duplicates/wordhl.py
@@ -237,15 +270,20 @@ def on_join(word, word_eol, event,attr):
 
 			elif (ip in exempt_list):
 				chan_context = hexchat.find_context(channel=chan)
-				request_url = json_api_website + ip
-				response = urllib.request.urlopen(request_url).read().decode('utf-8')
-				data = json.loads(response)
-				country_name = str(data['country_name'])
-				country_code = str(data['country_code'])
-				location = " "+ident +" "+ ip +" "+ country_name +"/"+ country_code + " "+ "\00320Exempt"
-				edited = True
-				chan_context.emit_print("Join", nick_cb, chan, location)
-				edited = False
+
+				send_to_thread = threading.Thread(target=print_later, args=(nick,chan_context,ip,))
+				send_to_thread.start()
+
+				
+				# request_url = json_api_website + ip
+				# response = urllib.request.urlopen(request_url).read().decode('utf-8')
+				# data = json.loads(response)
+				# country_name = str(data['country_name'])
+				# country_code = str(data['country_code'])
+				# location = " "+ident +" "+ ip +" "+ country_name +"/"+ country_code + " "+ "\00320Exempt"
+				# edited = True
+				# chan_context.emit_print("Join", nick_cb, chan, location)
+				# edited = False
 				return hexchat.EAT_ALL
 
 				
