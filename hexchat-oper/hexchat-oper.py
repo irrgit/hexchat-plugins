@@ -191,24 +191,27 @@ def on_join(word, word_eol, event,attr):
 
 		if(word[1] == '340' and nick == nick_cb):
 
-
 			ip = str(word[3])
-			print("Word is"+ ip)
+	
 			ip = str(re.findall(r"\@(.*)",ip))
-			print("Ip is :"+ ip)
+		
 			ip = ip[2:-2]
 
 			if (ip == '<unknown>'):
 				chan_context = hexchat.find_context(channel=chan)
-				location = ident +" Services Bot"
+				location = "Services Bot"
+				edited = True
+				chan_context.emit_print("Join", nick_cb, chan, location)
+				edited = False
+				return hexchat.EAT_ALL				
+
+			elif (ip in IRCCLOUD):
+				chan_context = hexchat.find_context(channel=chan)
+				location = ident +" IRCCLOUD USER"
 				edited = True
 				chan_context.emit_print("Join", nick_cb, chan, location)
 				edited = False
 
-				
-
-			elif (ip in IRCCLOUD):
-				print("Its IRCCLOUD")
 
 			elif (ip in exempt_list):				
 				print("In exempt list")
@@ -221,7 +224,7 @@ def on_join(word, word_eol, event,attr):
 				chan_context = hexchat.find_context(channel=chan)
 				country_name = str(data['country_name'])
 				country_code = str(data['country_code'])
-				location = ident +" "+ ip +" "+ country_name +"/"+country_code
+				location = " "+ident +" "+ ip +" "+ country_name +"/"+country_code
 				edited = True
 				chan_context.emit_print("Join", nick_cb, chan, location)
 				edited = False
