@@ -258,7 +258,7 @@ def on_join(word, word_eol, event,attr):
 				# ipintel_response = urllib.request.urlopen(ipintel_request_url).read().decode('utf-8')
 				ipintel_response = urllib.request.urlopen(ipintel_request_url)
 				proxy = ''
-				if (ipintel_response.status_code != 200) or (int(ipintel_response.content) < 0):
+				if (ipintel_response.getcode() != 200):
 					print("Error, remove this and just pass.")
 				else:
 					ipintel_response = ipintel_response.read().decode('utf-8')
