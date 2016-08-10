@@ -176,9 +176,9 @@ def xshun_cb(word,word_eol, _):
 
 	return hexchat.EAT_ALL		
 ############################################################################
-def print_later(nick,chan_context,ip):
+def print_later(nick,chan_context,ip,ident,nick_cb):
 	global edited
-	
+
 	request_url = json_api_website + ip
 	response = urllib.request.urlopen(request_url).read().decode('utf-8')
 	data = json.loads(response)
@@ -271,9 +271,9 @@ def on_join(word, word_eol, event,attr):
 			elif (ip in exempt_list):
 				chan_context = hexchat.find_context(channel=chan)
 
-				send_to_thread = threading.Thread(target=print_later, args=(nick,chan_context,ip,))
+				send_to_thread = threading.Thread(target=print_later, args=(nick,chan_context,ip,ident,nick_cb,))
 				send_to_thread.start()
-
+				
 				
 				# request_url = json_api_website + ip
 				# response = urllib.request.urlopen(request_url).read().decode('utf-8')
