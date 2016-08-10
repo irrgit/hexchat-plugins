@@ -261,7 +261,7 @@ def on_join(word, word_eol, event,attr):
 					ipintel_response = urllib.request.urlopen(ipintel_request_url).read().decode('utf-8')					
 					if (str(ipintel_response) == '1'):
 						proxy = 'Proxy'
-				except:
+				except HTTPError:
 					proxy =''
 
 
