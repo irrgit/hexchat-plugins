@@ -199,7 +199,13 @@ def on_join(word, word_eol, event,attr):
 			ip = ip[2:-2]
 
 			if (ip == '<unknown>'):
-				print("Its a bot")
+				chan_context = hexchat.find_context(channel=chan)
+				location = ident +" Services Bot"
+				edited = True
+				chan_context.emit_print("Join", nick_cb, chan, location)
+				edited = False
+
+				
 
 			elif (ip in IRCCLOUD):
 				print("Its IRCCLOUD")
