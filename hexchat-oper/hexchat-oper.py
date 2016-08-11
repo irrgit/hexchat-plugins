@@ -188,7 +188,7 @@ def print_later(nick,chan_context,ip,ident,nick_cb,chan):
 	edited = True
 	chan_context.emit_print("Join", nick_cb, chan, location)
 	edited = False
-	return hexchat.EAT_NONE
+	return 
 
 def print_later_proxy(nick,chan_context,ip,ident,nick_cb,chan):
 	global edited
@@ -215,7 +215,7 @@ def print_later_proxy(nick,chan_context,ip,ident,nick_cb,chan):
 	edited = True
 	chan_context.emit_print("Join", nick_cb, chan, location)
 	edited = False
-	return hexchat.EAT_NONE
+	return 
 ###########################################################################
 # below funciton is modeled after the following plugin by TingPing
 # https://github.com/TingPing/plugins/blob/master/HexChat/duplicates/wordhl.py
@@ -226,7 +226,10 @@ def on_join(word, word_eol, event,attr):
 	if edited or attr.time or not len(word) > 1:
 		return
 	nick = word[0]
-	chan = word[1]
+	chan = word[1].lower()
+	if chan != '#shqiperia':
+		return
+
 	ident = str(re.findall(r"(.*)\@",word[2]))
 	ident = ident[2:-2]		
 	userip_hook = None
@@ -249,7 +252,7 @@ def on_join(word, word_eol, event,attr):
 		nick_cb = str(re.findall(r":([^*=]+)", str(word[3])))
 		nick_cb = nick_cb[2:-2]
 
-		if(word[1] == '340' and nick == nick_cb):
+		if(word[1] == '340' and nick == nick_cb and chan =="#shqiperia"):
 
 			ip = str(word[3])
 	
@@ -324,7 +327,8 @@ def on_join(word, word_eol, event,attr):
 				# edited = False
 				#munch munch on the event to avoid infinite loop
 				return hexchat.EAT_ALL
-	
+		else:
+			return hexchat.EAT_NONE
 				
 
 	def onjoin_timeout_cb(_):
