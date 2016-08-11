@@ -197,10 +197,15 @@ def print_later_proxy(nick,chan_context,ip,ident,nick_cb,chan):
 	ipintel_request_url = ipintel_api_link + ip + ipintel_email + ipintel_flags			
 	proxy = ''
 	try:
-		ipintel_response = urllib.request.urlopen(ipintel_request_url).read().decode('utf-8')					
+		req = urllib.request.Request(ipintel_request_url,data=None, headers={
+			'User-Agent': 'Mozilla'
+			})
+		ipintel_response = urllib.request.urlopen(req).read().decode('utf-8')			
+	
 		if (str(ipintel_response) == '1'):
+
 			proxy = 'Proxy'
-	except HTTPError:
+	except HTTPError as err:
 		proxy =''
 	data = json.loads(geoip_response)
 	chan_context = hexchat.find_context(channel=chan)
