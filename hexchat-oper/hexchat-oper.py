@@ -188,6 +188,7 @@ def print_later(nick,chan_context,ip,ident,nick_cb,chan):
 	edited = True
 	chan_context.emit_print("Join", nick_cb, chan, location)
 	edited = False
+	return hexchat.EAT_NONE
 
 def print_later_proxy(nick,chan_context,ip,ident,nick_cb,chan):
 	global edited
@@ -209,6 +210,7 @@ def print_later_proxy(nick,chan_context,ip,ident,nick_cb,chan):
 	edited = True
 	chan_context.emit_print("Join", nick_cb, chan, location)
 	edited = False
+	return hexchat.EAT_NONE
 ###########################################################################
 # below funciton is modeled after the following plugin by TingPing
 # https://github.com/TingPing/plugins/blob/master/HexChat/duplicates/wordhl.py
