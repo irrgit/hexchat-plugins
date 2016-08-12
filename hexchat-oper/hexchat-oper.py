@@ -69,7 +69,8 @@ def load_exempt_ips():
 	with open(exempt_file_path) as f:
 		for line in f:
 			if '.' in line:
-				ip = line.rstrip('*')
+				ip = line.rstrip()
+				ip = ip.replace("*","")
 				exempt_list.append(ip)
 	
 load_exempt_ips()
@@ -175,48 +176,7 @@ def xshun_cb(word,word_eol, _):
 	xshun_timer_handle = hexchat.hook_timer(1000, xshun_timeout_cb)
 
 	return hexchat.EAT_ALL		
-############################################################################
-def print_later(nick,chan_context,ip,ident,nick_cb,chan):
-	global edited
 
-	request_url = json_api_website + ip
-	response = urllib.request.urlopen(request_url).read().decode('utf-8')
-	data = json.loads(response)
-	country_name = str(data['country_name'])
-	country_code = str(data['country_code'])
-	location = " "+ident +" "+ ip +" "+ country_name +"/"+ country_code + " "+ "\00320Exempt"
-	edited = True
-	chan_context.emit_print("Join", nick_cb, chan, location)
-	edited = False
-	return 
-
-def print_later_proxy(nick,chan_context,ip,ident,nick_cb,chan):
-	global edited
-	geoip_request_url = json_api_website + ip
-	geoip_response = urllib.request.urlopen(geoip_request_url).read().decode('utf-8')
-	ipintel_request_url = ipintel_api_link + ip + ipintel_email + ipintel_flags			
-	proxy = ''
-	try:
-		req = urllib.request.Request(ipintel_request_url,data=None, headers={
-			'User-Agent': 'Mozilla'
-			})
-		ipintel_response = urllib.request.urlopen(req).read().decode('utf-8')			
-	
-		if (str(ipintel_response) == '1'):
-
-			proxy = 'Proxy'
-	except HTTPError as err:
-		proxy =''
-	data = json.loads(geoip_response)
-	chan_context = hexchat.find_context(channel=chan)
-	country_name = str(data['country_name'])
-	country_code = str(data['country_code'])
-	location = " "+ident +" "+ ip +" "+ country_name +"/"+country_code +" "+ "\00320"+proxy
-	edited = True
-	chan_context.emit_print("Join", nick_cb, chan, location)
-	edited = False
-	return 
-###########################################################################
 # below funciton is modeled after the following plugin by TingPing
 # https://github.com/TingPing/plugins/blob/master/HexChat/duplicates/wordhl.py
 # The important parts are  line 14, line 19 and 28-31 
@@ -279,7 +239,8 @@ def on_join(word, word_eol, event,attr):
 				return hexchat.EAT_ALL
 
 
-			elif (exempt_ip in ip for exempt_ip in exempt_list):
+			elif (any(exempt_ip in ip for exempt_ip in exempt_list)):
+				print("Exempt ip : " + ip)
 				chan_context = hexchat.find_context(channel=chan)				
 				request_url = json_api_website + ip
 				response = urllib.request.urlopen(request_url).read().decode('utf-8')
@@ -310,6 +271,7 @@ def on_join(word, word_eol, event,attr):
 			
 						proxy = 'Proxy'
 				except HTTPError as err:
+
 					proxy =''
 				data = json.loads(geoip_response)
 				chan_context = hexchat.find_context(channel=chan)
