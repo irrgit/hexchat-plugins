@@ -280,52 +280,45 @@ def on_join(word, word_eol, event,attr):
 
 
 			elif (ip in exempt_list):
-				chan_context = hexchat.find_context(channel=chan)
-
-				send_to_thread = threading.Thread(target=print_later, args=(nick,chan_context,ip,ident,nick_cb,chan,))
-				send_to_thread.start()
-				
-				
-				# request_url = json_api_website + ip
-				# response = urllib.request.urlopen(request_url).read().decode('utf-8')
-				# data = json.loads(response)
-				# country_name = str(data['country_name'])
-				# country_code = str(data['country_code'])
-				# location = " "+ident +" "+ ip +" "+ country_name +"/"+ country_code + " "+ "\00320Exempt"
-				# edited = True
-				# chan_context.emit_print("Join", nick_cb, chan, location)
-				# edited = False
+				chan_context = hexchat.find_context(channel=chan)				
+				request_url = json_api_website + ip
+				response = urllib.request.urlopen(request_url).read().decode('utf-8')
+				data = json.loads(response)
+				country_name = str(data['country_name'])
+				country_code = str(data['country_code'])
+				location = " "+ident +" "+ ip +" "+ country_name +"/"+ country_code + " "+ "\00320Exempt"
+				edited = True
+				chan_context.emit_print("Join", nick_cb, chan, location)
+				edited = False
 				return hexchat.EAT_ALL
 
 				
 
 			else:
 				chan_context = hexchat.find_context(channel=chan)
-				send_to_thread = threading.Thread(target=print_later_proxy, args=(nick,chan_context,ip,ident,nick_cb,chan,))
-				send_to_thread.start()
-				# geoip_request_url = json_api_website + ip
-				# # would be nice to have the below code block in a thread to eliminate hangs
-				# geoip_response = urllib.request.urlopen(geoip_request_url).read().decode('utf-8')
-				# ipintel_request_url = ipintel_api_link + ip + ipintel_email + ipintel_flags		
+				geoip_request_url = json_api_website + ip
+				geoip_response = urllib.request.urlopen(geoip_request_url).read().decode('utf-8')
+				ipintel_request_url = ipintel_api_link + ip + ipintel_email + ipintel_flags			
+				proxy = ''
+				try:
+					req = urllib.request.Request(ipintel_request_url,data=None, headers={
+						'User-Agent': 'Mozilla'
+						})
+					ipintel_response = urllib.request.urlopen(req).read().decode('utf-8')			
 				
-				# proxy = ''
-				# try:
-				# 	ipintel_response = urllib.request.urlopen(ipintel_request_url).read().decode('utf-8')					
-				# 	if (str(ipintel_response) == '1'):
-				# 		proxy = 'Proxy'
-				# except HTTPError:
-				# 	proxy =''
-
-
-				# data = json.loads(geoip_response)
-				# chan_context = hexchat.find_context(channel=chan)
-				# country_name = str(data['country_name'])
-				# country_code = str(data['country_code'])
-				# location = " "+ident +" "+ ip +" "+ country_name +"/"+country_code +" "+ "\00320"+proxy
-				# edited = True
-				# chan_context.emit_print("Join", nick_cb, chan, location)
-				# edited = False
-				#munch munch on the event to avoid infinite loop
+					if (str(ipintel_response) == '1'):
+			
+						proxy = 'Proxy'
+				except HTTPError as err:
+					proxy =''
+				data = json.loads(geoip_response)
+				chan_context = hexchat.find_context(channel=chan)
+				country_name = str(data['country_name'])
+				country_code = str(data['country_code'])
+				location = " "+ident +" "+ ip +" "+ country_name +"/"+country_code +" "+ "\00320"+proxy
+				edited = True
+				chan_context.emit_print("Join", nick_cb, chan, location)
+				edited = False
 				return hexchat.EAT_ALL
 		else:
 			return hexchat.EAT_NONE
