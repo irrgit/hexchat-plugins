@@ -69,7 +69,7 @@ def load_exempt_ips():
 	with open(exempt_file_path) as f:
 		for line in f:
 			if '.' in line:
-				ip = line.rstrip()
+				ip = line.rstrip('*')
 				exempt_list.append(ip)
 	
 load_exempt_ips()
@@ -279,7 +279,7 @@ def on_join(word, word_eol, event,attr):
 				return hexchat.EAT_ALL
 
 
-			elif (ip in exempt_list):
+			elif (exempt_ip in ip for exempt_ip in exempt_list):
 				chan_context = hexchat.find_context(channel=chan)				
 				request_url = json_api_website + ip
 				response = urllib.request.urlopen(request_url).read().decode('utf-8')
