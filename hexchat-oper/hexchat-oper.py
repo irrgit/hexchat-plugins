@@ -122,7 +122,7 @@ def xline_cb(word,word_eol, _):
 	def xline_notice_cb(word, word_eol, _):
 		if word[1] == '378':
 			connecting_ip =  str(word[8])
-			if(connecting_ip  not in str (EXCLUDE_LIST)):
+			if(connecting_ip  not in str (IRCCLOUD)):
 				hexchat.command("os akill add %s *@%s %s" % (akill_time,str(connecting_ip),akill_reason))			
 
 		return hexchat.EAT_ALL	
@@ -163,7 +163,7 @@ def xshun_cb(word,word_eol, _):
 	def xshun_notice_cb(word, word_eol, _):
 		if word[1] == '378':
 			connecting_ip =  str(word[8])
-			if(connecting_ip  not in str (EXCLUDE_LIST)):
+			if(connecting_ip  not in str (IRCCLOUD)):
 				hexchat.command("shun +*@%s %s %s" % (str(connecting_ip),shun_time,shun_reason))
 
 		return hexchat.EAT_ALL	
