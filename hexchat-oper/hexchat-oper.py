@@ -240,7 +240,6 @@ def on_join(word, word_eol, event,attr):
 
 
 			elif (any(exempt_ip in ip for exempt_ip in exempt_list)):
-				print("Exempt ip : " + ip)
 				chan_context = hexchat.find_context(channel=chan)				
 				request_url = json_api_website + ip
 				response = urllib.request.urlopen(request_url).read().decode('utf-8')
