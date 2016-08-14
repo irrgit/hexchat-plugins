@@ -1,6 +1,6 @@
 __module_name__ = "oper-onjoin"
 __module_version__ = "1.1"
-__module_description__ = "Filter server notices to separate tabs."
+__module_description__ = "Override join messages in a channel"
 
 import hexchat
 import threading
