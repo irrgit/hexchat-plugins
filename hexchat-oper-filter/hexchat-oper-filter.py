@@ -79,3 +79,4 @@ def on_server_notice(word, word_eol, userdata):
 
 
 hexchat.hook_print("Server Notice", on_server_notice)
+print("Loaded-========================-")
