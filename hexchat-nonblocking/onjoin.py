@@ -16,11 +16,10 @@ import re
 
 # Configs below
 freegeoip_json_api = 'http://freegeoip.net/json/'
-ipintel_email = '&contact=irrgit@gmail.com'
-ipintel_flags = '&flags=m'
-ipintel_api_link = 'http://check.getipintel.net/check.php?ip='
+email = 'irrgit@gmail.com'
+flags = 'm'
 script_path = os.getcwd()
-exempt_file_path = script_path + '/excludeip.txt'
+exempt_file_path = script_path + r'C:\Users\test\Desktop\ipfile.txt'
 
 
 edited = False
@@ -50,18 +49,27 @@ def load_exempt_ips():
 load_exempt_ips()
 def get_data_py3(nick,ip):
     request_url = freegeoip_json_api + ip
-    print("in py3 thread")
     try:
         response = urllib.request.urlopen(request_url).read().decode('utf-8')
         data = json.loads(response)   
         country_name = data['country_name']
         country_code = data['country_code']
-        if(any(exempt_ip in ip for exempt_ip in exempt_list)):
+        if(any(exempt_ip in ip for exempt_ip in exempt_list) or country_name == 'Albania'):
             user_info = [ip,country_name,country_code,'Exempt']
             mydata[nick] = user_info
         else:
-            user_info = [ip,country_name,country_code]
-            mydata[nick] = user_info
+            try:
+                proxy = ''
+                ipintel_api_link = "http://check.getipintel.net/check.php?ip=%s&contact=%s&flags=%s" % (ip,email,flags)
+                request_obj = urllib.request.Request(ipintel_api_link,data=None, headers={'User-Agent': 'Mozilla'})
+                ipintel_response = urllib.request.urlopen(request_obj).read().decode('utf-8')
+                proxy_data = str(ipintel_response)
+                if(str(proxy_data) =='1'):
+                    proxy = 'Proxy'
+                user_info = [ip,country_name,country_code,proxy]
+                mydata[nick] = user_info
+            except HTTPError as err:
+                print("Something went wrong when trying to get Proxy data, PY3")
     except:
         print("Print something went wrong when trying to get IP data , PY3")
 
@@ -74,17 +82,29 @@ def get_data_py2(nick,ip):
         data = json.loads(response)
         country_name = data['country_name']
         country_code = data['country_code']
-        if(any(exempt_ip in ip for exempt_ip in exempt_list)):
+        if(any(exempt_ip in ip for exempt_ip in exempt_list) or country_name == 'Albania'):
             user_info = [ip,country_name,country_code,'Exempt']
             user_info = user_info = [s.encode('utf-8') for s in user_info]
             mydata[nick] = user_info
 
         else:
-            user_info = [ip,country_name,country_code]
-            user_info = [s.encode('utf-8') for s in user_info]
-            mydata[nick] = user_info 
+            try:
+                proxy =''
+                ipintel_api_link = "http://check.getipintel.net/check.php?ip=%s&contact=%s&flags=%s" % (ip,email,flags)
+                request_obj = urllib2.Request(ipintel_api_link,data=None, headers={'User-Agent': 'Mozilla'})
+                ipintel_response = urllib2.urlopen(request_obj).read().decode('utf-8')
+                proxy_data = str(ipintel_response)
+                if (proxy_data == '1'):
+                    proxy = 'Proxy'
+                else:
+                    proxy = ''
+                user_info = [ip,country_name,country_code,proxy]
+                user_info = [s.encode('utf-8') for s in user_info]
+                mydata[nick] = user_info
+            except urllib2.HTTPError as err:
+                print("Something went wrong when trying to get proxy data, PY2")
     except:
-        ("Print something went wrong when trying to get IP data , PY2")  
+        print("Domething went wrong when trying to get IP data , PY2")  
 
 
 
@@ -170,6 +190,8 @@ def on_chan_join(word,word_eol,event, attr):
         if len(user_info) == 4:
             if 'Exempt' in user_info[3]:
                 additional_info = user_info[3]
+            if 'Proxy' in user_info[3]:
+                additional_info = user_info[3]
         location = " "+ ident +" "+ ip_from_data +" " + country_name +"/"+ country_code +" "+ additional_info
         edited = True
         chan_context.emit_print("Join",nick,chan,location)
@@ -252,12 +274,24 @@ def on_chan_join(word,word_eol,event, attr):
                             data = json.loads(response)
                             country_name = data['country_name']
                             country_code = data['country_code']
-                            user_info = [ip,country_name,country_code,'']
-                            mydata[nick] = user_info
+                            try:
+                                proxy = ''
+                                ipintel_api_link = "http://check.getipintel.net/check.php?ip=%s&contact=%s&flags=%s" % (ip,email,flags)
+                                request_obj = urllib.request.Request(ipintel_api_link,data=None, headers={'User-Agent': 'Mozilla'})
+                                ipintel_response = urllib.request.urlopen(request_obj).read().decode('utf-8')
+                                proxy_data = str(ipintel_response)
+                                if(str(proxy_data) =='1'):
+                                    proxy = 'Proxy'
+                                user_info = [ip,country_name,country_code,proxy]
+                                mydata[nick] = user_info  
+
+                            except HTTPError as err:
+
+                                print("Error py3 getting response for proxy")
 
                             #here query for proxy response and update the  variable
                         except:
-                            print("Error py3 getting resonse for proxy")
+                            print("Error py3 getting resonse for geoip")
 
 
                     else:
@@ -266,12 +300,23 @@ def on_chan_join(word,word_eol,event, attr):
                             data = json.loads(response)
                             country_name = data['country_name']
                             country_code = data['country_code']
-                            user_info = [ip,country_name,country_code,'']
-                            user_info = user_info = [s.encode('utf-8') for s in user_info]
-                            mydata[nick] = user_info
+                            try:  
+                                request_obj = urllib2.Request(ipintel_api_link,data=None, headers={'User-Agent': 'Mozilla'})
+                                ipintel_response = urllib2.urlopen(request_obj).read().decode('utf-8')
+                                proxy_data = str(ipintel_response)
+                                if (proxy_data == '1'):
+                                    proxy = 'Proxy'
+                                else:
+                                    proxy = ''
+                                user_info = [ip,country_name,country_code,proxy]
+                                user_info = [s.encode('utf-8') for s in user_info]
+                                mydata[nick] = user_info
+
+                            except urllib2.HTTPError as err:
+                                print("Error py2 getting response for proxy")
                             #here query for proxy response and update the variable
                         except:
-                            print("Error py2 getting response for proxy")
+                            print("Error py2 getting response for geoip")
 
                     location = " "+ident +" "+ ip +" "+ country_name +"/"+country_code +" "+ "\00320"+proxy
                     edited = True
@@ -279,32 +324,6 @@ def on_chan_join(word,word_eol,event, attr):
                     edited = False
                     return hexchat.EAT_ALL
 
-
-                    # geoip_request_url = json_api_website + ip
-                    # geoip_response = urllib.request.urlopen(geoip_request_url).read().decode('utf-8')
-                    # ipintel_request_url = ipintel_api_link + ip + ipintel_email + ipintel_flags         
-                    # proxy = ''
-                    # try:
-                    #     req = urllib.request.Request(ipintel_request_url,data=None, headers={
-                    #         'User-Agent': 'Mozilla'
-                    #         })
-                    #     ipintel_response = urllib.request.urlopen(req).read().decode('utf-8')           
-                    
-                    #     if (str(ipintel_response) == '1'):
-                
-                    #         proxy = 'Proxy'
-                    # except HTTPError as err: 
-                    #     print("Some error happened")   
-                    #     proxy =''
-                    # data = json.loads(geoip_response)
-                    # country_name = str(data['country_name'])
-                    # country_code = str(data['country_code'])
-                    # user_info = [ip,country_name,country_code]
-                    # location = " "+ident +" "+ ip +" "+ country_name +"/"+country_code +" "+ "\00320"+proxy
-                    # edited = True
-                    # chan_context.emit_print("Join", nick_cb, chan, location)
-                    # edited = False
-                    # return hexchat.EAT_ALL
             else:
                 return hexchat.EAT_NONE
 
