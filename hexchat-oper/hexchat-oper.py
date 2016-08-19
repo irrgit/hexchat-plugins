@@ -327,12 +327,12 @@ def on_chan_join(word,word_eol,event, attr):
                             country_name = data['country_name']
                             country_code = data['country_code']
                             proxy = ''
-                            ipintel_api_link = "http://check.getipintel.net/check.php?ip=%s&contact=%s&flags=%s" % (ip,email,flags)
-                            request_obj = urllib.request.Request(ipintel_api_link,data=None, headers={'User-Agent': 'Mozilla'})
-                            ipintel_response = urllib.request.urlopen(request_obj).read().decode('utf-8')
-                            proxy_data = str(ipintel_response)
-                            if(str(proxy_data) =='1'):
-                                proxy = 'Proxy'
+                            #ipintel_api_link = "http://check.getipintel.net/check.php?ip=%s&contact=%s&flags=%s" % (ip,email,flags)
+                            #request_obj = urllib.request.Request(ipintel_api_link,data=None, headers={'User-Agent': 'Mozilla'})
+                            #ipintel_response = urllib.request.urlopen(request_obj).read().decode('utf-8')
+                            #proxy_data = str(ipintel_response)
+                            #if(str(proxy_data) =='1'):
+                            #    proxy = 'Proxy'
                             user_info = [ip,country_name,country_code,proxy]
                             mydata[nick] = user_info  
 
