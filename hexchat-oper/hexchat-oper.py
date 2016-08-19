@@ -106,7 +106,7 @@ def get_data_py3(nick,ip):
                 print("Something went wrong when trying to get Proxy data, PY3")
     except:
         print("Print something went wrong when trying to get IP data , PY3")
-
+        return
 
 def get_data_py2(nick,ip):
     request_url = freegeoip_json_api + ip
@@ -145,7 +145,7 @@ def get_data_py2(nick,ip):
                 print("Something went wrong when trying to get proxy data, PY2")
     except:
         print("Domething went wrong when trying to get IP data , PY2")  
-
+        return
 
 
 
@@ -169,11 +169,13 @@ def on_server_join(word,word_eol,userdata):
             else:
                 send_to_thread = threading.Thread(target=get_data_py2, args=(nickname,ip,))
                 send_to_thread.start()
+    	return
 
     elif 'Client exiting' in notice:
         nickname = re.findall(r": ([^!]+)",notice)[0]
         if nickname in mydata:
             del mydata[nickname]
+    	return
 
     elif 'forced to change his/her nickname' in notice:
         oldnick = re.findall(r"-- ([^()]+) ",notice)[0]
@@ -189,7 +191,7 @@ def on_server_join(word,word_eol,userdata):
             else:
                 send_to_thread = threading.Thread(target=get_data_py2, args=(newnick,ip,))
                 send_to_thread.start()
-
+    	return
     elif 'has changed his/her nickname' in notice:
         ip = re.findall(r"@([^)]+)",notice)[0]
         oldnick = re.findall(r"-- ([^()]+) ",notice)[0]
@@ -205,6 +207,7 @@ def on_server_join(word,word_eol,userdata):
             else:
                 send_to_thread = threading.Thread(target=get_data_py2, args=(newnick,ip,))
                 send_to_thread.start() 
+    	return
     else:
         return 
         
@@ -217,7 +220,10 @@ def on_chan_join(word,word_eol,event, attr):
     nick = word[0]
     chan = word[1]
     chan_context = hexchat.find_context(channel=chan)
-    ident = re.findall(r"(.*)\@",word[2])[0]
+    try:
+    	ident = re.findall(r"(.*)\@",word[2])[0]
+    except:
+    	return
 
 
     if nick in mydata:
@@ -245,11 +251,17 @@ def on_chan_join(word,word_eol,event, attr):
 
         def userip_callback(word,word_eol,_):
             global edited
-            nick_cb = re.findall(r":([^*=]+)", str(word[3]))[0]
+            try:
+            	nick_cb = re.findall(r":([^*=]+)", str(word[3]))[0]
+            except:
+            	return
 
             if(word[1] == '340' and nick == nick_cb):
                 unhook()
-                ip = re.findall(r"\@(.*)",str(word[3]))[0]
+                try:
+                	ip = re.findall(r"\@(.*)",str(word[3]))[0]
+                except:
+                	return
 
                 if(ip == '<unknown>'):
                     user_info = ['Bot','Earth','']
@@ -341,15 +353,16 @@ def on_chan_join(word,word_eol,event, attr):
                             country_name = data['country_name']
                             country_code = data['country_code']
                             
-                            ipintel_api_link = "http://check.getipintel.net/check.php?ip=%s&contact=%s&flags=%s" % (ip,email,flags)
-                            request_obj = urllib2.Request(ipintel_api_link,data=None, headers={'User-Agent': 'Mozilla'})
-                            ipintel_response = urllib2.urlopen(request_obj).read().decode('utf-8')
-                            proxy_data = str(ipintel_response)
-                            print(proxy_data)####################
-                            if (proxy_data == '1'):
-                                proxy = 'Proxy'
-                            else:
-                                proxy = ''
+                            #ipintel_api_link = "http://check.getipintel.net/check.php?ip=%s&contact=%s&flags=%s" % (ip,email,flags)
+                            #request_obj = urllib2.Request(ipintel_api_link,data=None, headers={'User-Agent': 'Mozilla'})
+                            #ipintel_response = urllib2.urlopen(request_obj).read().decode('utf-8')
+                           # proxy_data = str(ipintel_response)
+                            #print("Proxy Data is : %s") % proxy_data
+                            #print(proxy_data)####################
+                            #if (proxy_data == '1'):
+                            #    proxy = 'Proxy'
+                            #else:
+                            #    proxy = ''
                             user_info = [ip,country_name,country_code,proxy]
                             user_info = [s.encode('utf-8') for s in user_info]
                             mydata[nick] = user_info
@@ -367,7 +380,7 @@ def on_chan_join(word,word_eol,event, attr):
                     return hexchat.EAT_ALL
 
             else:
-                return hexchat.EAT_NONE
+                return
 
         def onjoin_timeout_cb(_):
             unhook()
@@ -454,7 +467,7 @@ def xline_cb(word,word_eol, _):
     def xline_notice_cb(word, word_eol, _):
         if word[1] == '378':
             connecting_ip =  str(word[8])
-            if(connecting_ip  not in str (IRCCLOUD)):
+            if(connecting_ip  not in str (IRCCloud)):
                 hexchat.command("os akill add %s *@%s %s" % (akill_time,str(connecting_ip),akill_reason))           
 
         return hexchat.EAT_ALL  
