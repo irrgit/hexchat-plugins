@@ -1,5 +1,12 @@
 # hexchat-oper
-Oper plugin for hexchat that makes placing akills and shuns easier.  
+Oper helper plugin for hexchat with the following features:  
+<b> Adds command to place a shun by nick as such `/xshun <nick> </b>
+
+
+
+
+
+
 To install simply place in your addons folder.  
 On Linux: sudo pip install pyperclip  
         
