@@ -173,6 +173,7 @@ def on_server_join(word,word_eol,userdata):
 
     elif 'Client exiting' in notice:
         nickname = re.findall(r": ([^!]+)",notice)[0]
+        nickname = nickname.replace(" ","")
         if nickname in mydata:
             del mydata[nickname]
     	return
