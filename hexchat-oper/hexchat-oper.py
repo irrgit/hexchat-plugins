@@ -419,7 +419,6 @@ def get_user_list(context):
 
 def on_chan_ban(word,word_eol,event,attr):
 
-
     mask_list = []
     nicks_matching = []
     chan_context = hexchat.get_context()
@@ -437,18 +436,14 @@ def on_chan_ban(word,word_eol,event,attr):
         return
 
     user_list = get_user_list(chan_context)
-
     
     for user in user_list:
         fullhost =  '*!*' + user.host
         toappend = (user.nick, fullhost)
         mask_list.append(toappend)
 
-
     if len(mask_list) > 0:
         for user_nick , user_mask in mask_list:
-            print(user_nick) ##
-            print(user_mask) ##
             if match_mask(banmask,user_mask) == True:
                 nicks_matching.append(user_nick)
     if len(nicks_matching) > 0:
@@ -462,12 +457,6 @@ def on_chan_ban(word,word_eol,event,attr):
     edited_ban = False
 
     return hexchat.EAT_ALL
-
-
-
-
-
-
 
 def on_chan_unban(word,word_eol,event,attr):
     mask_list = []
@@ -486,7 +475,6 @@ def on_chan_unban(word,word_eol,event,attr):
         return
 
     user_list = get_user_list(chan_context)
-
 
     for user in user_list:
         fullhost = '*!*' + user.host
@@ -511,12 +499,8 @@ def on_chan_unban(word,word_eol,event,attr):
 
     return hexchat.EAT_ALL
 
-
-
-
 def xsqline(word,word_eol, _):
     xsqline_nick = None
-  
 
     #get the nickname from the clipboard
     if os.name =="posix":
@@ -533,7 +517,6 @@ def xsqline(word,word_eol, _):
 
     #issue an sqline on that nickname
     command = "os sqline add +30d *%s* %s" % (xsqline_nick, sqline_reason)
-    print(command)
     hexchat.command(command)
 
 def xshun_cb(word,word_eol, _):
