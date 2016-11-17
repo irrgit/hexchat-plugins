@@ -30,8 +30,19 @@ shun_time ='5m'
 shun_reason ='Pushim'
 akill_time = '+2d' #2 days
 akill_reason ='Proxy/Ofendime/Flood/Abuse'
+sqline_reason = 'Nick/Banal'
+check_proxy = False # set to check each IP if its a proxy, Warning this could get slow
+
 
 edited = False
+
+#Channel Ban text event 
+edited_ban = False
+#Channel UnBan text event 
+edited_unban = False
+#used to recompile a hostmask to a regex that matches said mask
+wildcards = {'?':r'.', '*': r'.*'}
+
 mydata = {}
 
 IRCCloud = [
@@ -169,14 +180,14 @@ def on_server_join(word,word_eol,userdata):
             else:
                 send_to_thread = threading.Thread(target=get_data_py2, args=(nickname,ip,))
                 send_to_thread.start()
-    	return
+        return
 
     elif 'Client exiting' in notice:
         nickname = re.findall(r": ([^!(]+)",notice)[0]
         nickname = nickname.replace(" ","")
         if nickname in mydata:
             del mydata[nickname]
-    	return
+        return
 
     elif 'forced to change his/her nickname' in notice:
         oldnick = re.findall(r"-- ([^()]+) ",notice)[0]
@@ -192,7 +203,7 @@ def on_server_join(word,word_eol,userdata):
             else:
                 send_to_thread = threading.Thread(target=get_data_py2, args=(newnick,ip,))
                 send_to_thread.start()
-    	return
+        return
     elif 'has changed his/her nickname' in notice:
         ip = re.findall(r"@([^)]+)",notice)[0]
         oldnick = re.findall(r"-- ([^()]+) ",notice)[0]
@@ -208,7 +219,7 @@ def on_server_join(word,word_eol,userdata):
             else:
                 send_to_thread = threading.Thread(target=get_data_py2, args=(newnick,ip,))
                 send_to_thread.start() 
-    	return
+        return
     else:
         return 
         
@@ -222,9 +233,9 @@ def on_chan_join(word,word_eol,event, attr):
     chan = word[1]
     chan_context = hexchat.find_context(channel=chan)
     try:
-    	ident = re.findall(r"(.*)\@",word[2])[0]
+        ident = re.findall(r"(.*)\@",word[2])[0]
     except:
-    	return
+        return
 
 
     if nick in mydata:
@@ -253,16 +264,16 @@ def on_chan_join(word,word_eol,event, attr):
         def userip_callback(word,word_eol,_):
             global edited
             try:
-            	nick_cb = re.findall(r":([^*=]+)", str(word[3]))[0]
+                nick_cb = re.findall(r":([^*=]+)", str(word[3]))[0]
             except:
-            	return
+                return
 
             if(word[1] == '340' and nick == nick_cb):
                 unhook()
                 try:
-                	ip = re.findall(r"\@(.*)",str(word[3]))[0]
+                    ip = re.findall(r"\@(.*)",str(word[3]))[0]
                 except:
-                	return
+                    return
 
                 if(ip == '<unknown>'):
                     user_info = ['Bot','Earth','']
@@ -393,10 +404,137 @@ def on_chan_join(word,word_eol,event, attr):
 
 
 
+def match_mask(mask, searchmask ):
+    if searchmask is None:
+        searchmask = ''
+    for match, repl in wildcards.items():
+        mask = mask.replace(match,repl)
+    return bool(re.match(mask,searchmask,re.IGNORECASE))
+        
+
+
+def get_user_list(context):
+    list = context.get_list("users")
+    return list
 
 def on_chan_ban(word,word_eol,event,attr):
-    #override bans here
-    print ("On chan ban funciton")
+
+
+    mask_list = []
+    nicks_matching = []
+    chan_context = hexchat.get_context()
+    emit_nicks = ""
+
+    global edited_ban
+    if edited_ban or attr.time or not len(word) > 1:
+        return
+
+    nick = word[0]
+    banmask = word[1]
+
+    # ban of type nick below, nick!*@* , no need to edit check if last 4 chars match
+    if banmask[-4:] == '!*@*':
+        return
+
+    user_list = get_user_list(chan_context)
+
+    
+    for user in user_list:
+        fullhost =  '*!*' + user.host
+        toappend = (user.nick, fullhost)
+        mask_list.append(toappend)
+
+
+    if len(mask_list) > 0:
+        for user_nick , user_mask in mask_list:
+            print(user_nick) ##
+            print(user_mask) ##
+            if match_mask(banmask,user_mask) == True:
+                nicks_matching.append(user_nick)
+    if len(nicks_matching) > 0:
+        for nick in nicks_matching:
+            emit_nicks += ("\00320"+str(nick) +" ")
+    mask_addendum = "\00317 | " + banmask
+    emit_nicks += mask_addendum
+    
+    edited_ban = True
+    chan_context.emit_print("Channel Ban",nick,emit_nicks)
+    edited_ban = False
+
+    return hexchat.EAT_ALL
+
+
+
+
+
+
+
+def on_chan_unban(word,word_eol,event,attr):
+    mask_list = []
+    nicks_matching = []
+    chan_context = hexchat.get_context()
+    emit_nicks = ""
+
+    global edited_unban
+    if edited_unban or attr.time or not len(word) > 1:
+        return
+
+    nick = word[0]
+    unban_mask = word[1]
+
+    if unban_mask[-4:] == '!*@*':
+        return
+
+    user_list = get_user_list(chan_context)
+
+
+    for user in user_list:
+        fullhost = '*!*' + user.host
+        toappend = (user.nick,fullhost)
+        mask_list.append(toappend)
+
+
+    if len(mask_list) > 0:
+        for user_nick, user_mask in mask_list:
+            if match_mask(unban_mask,user_mask) == True:
+                nicks_matching.append(user_nick)
+    if len(nicks_matching) > 0:
+        for nick in nicks_matching:
+            emit_nicks += ("\00320" + str(nick) + " ")
+
+    mask_addendum = "\00317 | " + unban_mask
+    emit_nicks += mask_addendum
+
+    edited_unban = True
+    chan_context.emit_print("Channel UnBan",nick,emit_nicks)
+    edited_unban = False
+
+    return hexchat.EAT_ALL
+
+
+
+
+def xsqline(word,word_eol, _):
+    xsqline_nick = None
+  
+
+    #get the nickname from the clipboard
+    if os.name =="posix":
+        xsqline_nick = pyperclip.paste()
+
+    if os.name =="nt":
+        xsqline_nick = getclip()
+
+    xsqline_nick = str(xsqline_nick)
+
+    #unicode fix
+    if(sys.version_info > (3, 0)):
+        xsqline_nick = xsqline_nick[2:-1]
+
+    #issue an sqline on that nickname
+    command = "os sqline add +30d *%s* %s" % (xsqline_nick, sqline_reason)
+    print(command)
+    hexchat.command(command)
 
 def xshun_cb(word,word_eol, _):
     global numerics
@@ -482,10 +620,20 @@ def xline_cb(word,word_eol, _):
     return hexchat.EAT_ALL
 hexchat.hook_command("xline", xline_cb, help="/xline <nick> , Akills user from the server.")
 hexchat.hook_command("xshun", xshun_cb, help="/xshun <nick> , Shuns user from the server.")
+hexchat.hook_command("xsqline", xsqline, help="/xsqline <nick> , Places an sqline on the nick")
 hexchat.hook_print("Server Notice", on_server_join)
 hexchat.hook_print_attrs("Join", on_chan_join, "Join",priority=hexchat.PRI_NORM)
+hexchat.hook_print_attrs("Channel Ban", on_chan_ban, "Channel Ban",priority=hexchat.PRI_NORM)
+hexchat.hook_print_attrs("Channel UnBan", on_chan_unban, "Channel UnBan",priority=hexchat.PRI_NORM)
 print(__module_version__ + " version " + __module_name__ + " loaded.")
             
 
 
 
+'''
+TODO
+
+Add keyboard shortcuts inside this plugin if possible.
+Move GeoIP checking to a local DB instead of using a web API.
+
+'''
