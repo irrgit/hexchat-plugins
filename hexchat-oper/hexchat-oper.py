@@ -428,7 +428,7 @@ def on_chan_ban(word,word_eol,event,attr):
     if edited_ban or attr.time or not len(word) > 1:
         return
 
-    nick = word[0]
+    bnick = word[0]
     banmask = word[1]
 
     # ban of type nick below, nick!*@* , no need to edit check if last 4 chars match
@@ -453,7 +453,7 @@ def on_chan_ban(word,word_eol,event,attr):
     emit_nicks += mask_addendum
     
     edited_ban = True
-    chan_context.emit_print("Channel Ban",nick,emit_nicks)
+    chan_context.emit_print("Channel Ban",bnick,emit_nicks)
     edited_ban = False
 
     return hexchat.EAT_ALL
@@ -468,7 +468,7 @@ def on_chan_unban(word,word_eol,event,attr):
     if edited_unban or attr.time or not len(word) > 1:
         return
 
-    nick = word[0]
+    bnick = word[0]
     unban_mask = word[1]
 
     if unban_mask[-4:] == '!*@*':
@@ -494,7 +494,7 @@ def on_chan_unban(word,word_eol,event,attr):
     emit_nicks += mask_addendum
 
     edited_unban = True
-    chan_context.emit_print("Channel UnBan",nick,emit_nicks)
+    chan_context.emit_print("Channel UnBan",bnick,emit_nicks)
     edited_unban = False
 
     return hexchat.EAT_ALL
