@@ -1,11 +1,18 @@
 __module_name__ = "hexchat-oper"
 __module_version__ = "2.1"
 __module_description__ = "Oper helper, read documentation"
-
+import os
+import sys
+# path = str((os.getcwd()))
+# sys.path.insert(0,path)
+# print(path)
 import hexchat
 import threading
-import sys
-import os
+sys.path.append(os.path.join(os.path.dirname(__file__), "extras"))
+path = os.path.join(os.path.dirname(__file__), "extras")
+geoip_dat = os.path.join(path,"GeoIP" + "." + 'dat')
+import pygeoip
+
 if(sys.version_info > (3, 0)):
     import urllib.request
     from urllib.error import HTTPError
@@ -21,7 +28,7 @@ import json
 import re
 
 # Configs below
-freegeoip_json_api = 'http://freegeoip.net/json/'
+
 email = 'irrgit@gmail.com'
 flags = 'm'
 script_path = os.getcwd()
@@ -55,8 +62,11 @@ IRCCloud = [
 ]
 numerics = ["311","379","378","319","312","313",
             "310","317","318","307","335","320"]
-# End configs
+
 exempt_list = []
+gi = pygeoip.GeoIP(geoip_dat)
+# End configs
+
 def load_exempt_ips():
     global exempt_list
     #empty the list
@@ -93,12 +103,11 @@ def getclip():
 
 
 def get_data_py3(nick,ip):
-    request_url = freegeoip_json_api + ip
+    
     try:
-        response = urllib.request.urlopen(request_url).read().decode('utf-8')
-        data = json.loads(response)   
-        country_name = data['country_name']
-        country_code = data['country_code']
+        country_code = gi.country_code_by_addr(ip)  
+        country_name = gi.country_name_by_addr(ip)
+        
         if(any(exempt_ip in ip for exempt_ip in exempt_list) or country_name == 'Albania'):
             user_info = [ip,country_name,country_code,'Exempt']
             mydata[nick] = user_info
@@ -120,13 +129,10 @@ def get_data_py3(nick,ip):
         return
 
 def get_data_py2(nick,ip):
-    request_url = freegeoip_json_api + ip
 
     try:
-        response = urllib2.urlopen(request_url).read().decode('utf-8')
-        data = json.loads(response)
-        country_name = data['country_name']
-        country_code = data['country_code']
+        country_code = gi.country_code_by_addr(ip)  
+        country_name = gi.country_name_by_addr(ip)
         if(any(exempt_ip in ip for exempt_ip in exempt_list) or country_name == 'Albania'):
             user_info = [ip,country_name,country_code,'Exempt']
             user_info = user_info = [s.encode('utf-8') for s in user_info]
@@ -293,27 +299,23 @@ def on_chan_join(word,word_eol,event, attr):
                     return hexchat.EAT_ALL
 
                 elif (any(exempt_ip in ip for exempt_ip in exempt_list)):
-                    request_url = freegeoip_json_api + ip
+             
                     response = None
                     data = None
                     country_name = None
                     country_code = None
                     if (sys.version_info >(3, 0)):
                         try:
-                            response = urllib.request.urlopen(request_url).read().decode('utf-8')
-                            data = json.loads(response)
-                            country_name = data['country_name']
-                            country_code = data['country_code']
+                            country_code = gi.country_code_by_addr(ip)  
+                            country_name = gi.country_name_by_addr(ip)
                             user_info = [ip,country_name,country_code,'Exempt']
                             mydata[nick] = user_info
                         except:
                             print("error py3 getting response") 
                     else:
                         try:
-                            response = urllib2.urlopen(request_url).read().decode('utf-8')
-                            data = json.loads(response)
-                            country_name = data['country_name']
-                            country_code = data['country_code']
+                            country_code = gi.country_code_by_addr(ip)  
+                            country_name = gi.country_name_by_addr(ip)
                             user_info = [ip,country_name,country_code,'Exempt']
                             user_info = user_info = [s.encode('utf-8') for s in user_info]
                             mydata[nick] = user_info
@@ -326,7 +328,7 @@ def on_chan_join(word,word_eol,event, attr):
                     return hexchat.EAT_ALL
 
                 else:#below needs to be done almost the same as above but add getipintel
-                    request_url = freegeoip_json_api + ip
+
                     response = None
                     data = None
                     country_name = None
@@ -334,10 +336,8 @@ def on_chan_join(word,word_eol,event, attr):
                     proxy =''
                     if(sys.version_info > (3, 0)):
                         try:
-                            response = urllib.request.urlopen(request_url).read().decode('utf-8')
-                            data = json.loads(response)
-                            country_name = data['country_name']
-                            country_code = data['country_code']
+                            country_code = gi.country_code_by_addr(ip)  
+                            country_name = gi.country_name_by_addr(ip)
                             proxy = ''
                             #ipintel_api_link = "http://check.getipintel.net/check.php?ip=%s&contact=%s&flags=%s" % (ip,email,flags)
                             #request_obj = urllib.request.Request(ipintel_api_link,data=None, headers={'User-Agent': 'Mozilla'})
@@ -360,10 +360,8 @@ def on_chan_join(word,word_eol,event, attr):
 
                     else:
                         try:
-                            response = urllib2.urlopen(request_url).read().decode('utf-8')
-                            data = json.loads(response)
-                            country_name = data['country_name']
-                            country_code = data['country_code']
+                            country_code = gi.country_code_by_addr(ip)  
+                            country_name = gi.country_name_by_addr(ip)
                             
                             #ipintel_api_link = "http://check.getipintel.net/check.php?ip=%s&contact=%s&flags=%s" % (ip,email,flags)
                             #request_obj = urllib2.Request(ipintel_api_link,data=None, headers={'User-Agent': 'Mozilla'})
@@ -384,8 +382,11 @@ def on_chan_join(word,word_eol,event, attr):
                         except urllib2.HTTPError as err:
                             print (err.code)
                             print("Error py2 getting response for geoip")
-
-                    location = " "+ident +" "+ ip +" "+ country_name +"/"+country_code +" "+ "\00320"+proxy
+                    location =""
+                    try:                        
+                        location = " "+ident +" "+ ip +" "+ country_name +"/"+country_code +" "+ "\00320"+proxy
+                    except:
+                        return
                     edited = True
                     chan_context.emit_print("Join", nick_cb, chan, location)
                     edited = False
