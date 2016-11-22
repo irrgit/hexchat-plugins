@@ -1,6 +1,6 @@
 __module_name__ = "hexchat-oper"
 __module_version__ = "2.1"
-__module_description__ = "Oper helper, read documentation"
+__module_description__ = "Python 3 Windows"
 import os
 import sys
 # path = str((os.getcwd()))
@@ -8,19 +8,16 @@ import sys
 # print(path)
 import hexchat
 import threading
-sys.path.append(os.path.join(os.path.dirname(__file__), "extras"))
-path = os.path.join(os.path.dirname(__file__), "extras")
+sys.path.append(os.path.join(os.path.dirname("__file__"), "extras"))
+path = os.path.join(os.path.dirname("__file__"), "extras")
 geoip_dat = os.path.join(path,"GeoIP" + "." + 'dat')
 import pygeoip
 
 if(sys.version_info > (3, 0)):
     import urllib.request
     from urllib.error import HTTPError
-else:
-    import urllib2
-if os.name =="posix":
-    import pyperclip
-elif os.name == "nt":
+
+if os.name == "nt":
     import ctypes   
 else:
     raise Exception("Unknown/unsupported OS")
@@ -128,45 +125,6 @@ def get_data_py3(nick,ip):
         print("Print something went wrong when trying to get IP data , PY3")
         return
 
-def get_data_py2(nick,ip):
-
-    try:
-        country_code = gi.country_code_by_addr(ip)  
-        country_name = gi.country_name_by_addr(ip)
-        if(any(exempt_ip in ip for exempt_ip in exempt_list) or country_name == 'Albania'):
-            user_info = [ip,country_name,country_code,'Exempt']
-            user_info = user_info = [s.encode('utf-8') for s in user_info]
-            mydata[nick] = user_info
-
-        else:
-            try:
-                proxy =''
-                ipintel_api_link = "http://check.getipintel.net/check.php?ip=%s&contact=%s&flags=%s" % (ip,email,flags)
-                request_obj = urllib2.Request(ipintel_api_link, headers={'User-Agent': 'Mozilla'})
-
-
-                ipintel_response = urllib2.urlopen(request_obj).read().decode('utf-8')
-                proxy_data = str(ipintel_response)
-
-                print (proxy_data) ##############3
-
-                if (proxy_data == '1'):
-                    proxy = 'Proxy'
-                else:
-                    proxy = ''
-                user_info = [ip,country_name,country_code,proxy]
-                user_info = [s.encode('utf-8') for s in user_info]
-                mydata[nick] = user_info
-            except urllib2.HTTPError as err:
-                print(err.code)
-                print("Something went wrong when trying to get proxy data, PY2")
-    except:
-        print("Domething went wrong when trying to get IP data , PY2")  
-        return
-
-
-
-
 def on_server_join(word,word_eol,userdata):
     global mydata
     notice = word[0]
@@ -192,7 +150,9 @@ def on_server_join(word,word_eol,userdata):
         nickname = re.findall(r": ([^!(]+)",notice)[0]
         nickname = nickname.replace(" ","")
         if nickname in mydata:
-            del mydata[nickname]
+            mydata.pop(nickname, None)
+        else:
+            print("Not in the dictionary")
         return
 
     elif 'forced to change his/her nickname' in notice:
@@ -206,9 +166,7 @@ def on_server_join(word,word_eol,userdata):
             if(sys.version_info > (3, 0)):
                 send_to_thread = threading.Thread(target=get_data_py3,args=(newnick,ip,))
                 send_to_thread.start()
-            else:
-                send_to_thread = threading.Thread(target=get_data_py2, args=(newnick,ip,))
-                send_to_thread.start()
+
         return
     elif 'has changed his/her nickname' in notice:
         ip = re.findall(r"@([^)]+)",notice)[0]
@@ -222,9 +180,6 @@ def on_server_join(word,word_eol,userdata):
             if(sys.version_info > (3, 0)):
                 send_to_thread = threading.Thread(target=get_data_py3, args=(newnick,ip,))
                 send_to_thread.start()
-            else:
-                send_to_thread = threading.Thread(target=get_data_py2, args=(newnick,ip,))
-                send_to_thread.start() 
         return
     else:
         return 
@@ -339,53 +294,26 @@ def on_chan_join(word,word_eol,event, attr):
                             country_code = gi.country_code_by_addr(ip)  
                             country_name = gi.country_name_by_addr(ip)
                             proxy = ''
-                            #ipintel_api_link = "http://check.getipintel.net/check.php?ip=%s&contact=%s&flags=%s" % (ip,email,flags)
-                            #request_obj = urllib.request.Request(ipintel_api_link,data=None, headers={'User-Agent': 'Mozilla'})
-                            #ipintel_response = urllib.request.urlopen(request_obj).read().decode('utf-8')
-                            #proxy_data = str(ipintel_response)
-                            #if(str(proxy_data) =='1'):
-                            #    proxy = 'Proxy'
+                            ipintel_api_link = "http://check.getipintel.net/check.php?ip=%s&contact=%s&flags=%s" % (ip,email,flags)
+                            request_obj = urllib.request.Request(ipintel_api_link,data=None, headers={'User-Agent': 'Mozilla'})
+                            ipintel_response = urllib.request.urlopen(request_obj).read().decode('utf-8')
+                            proxy_data = str(ipintel_response)
+                            if(str(proxy_data) =='1'):
+                               proxy = 'Proxy'
                             user_info = [ip,country_name,country_code,proxy]
-                            mydata[nick] = user_info  
-
-                           
+                            mydata[nick] = user_info                
 
                               
 
-                            #here query for proxy response and update the  variable
                         except HTTPError as err:
                             print(err.code)
-                            print("Error py3 getting resonse for geoip")
-
-
-                    else:
-                        try:
-                            country_code = gi.country_code_by_addr(ip)  
-                            country_name = gi.country_name_by_addr(ip)
-                            
-                            #ipintel_api_link = "http://check.getipintel.net/check.php?ip=%s&contact=%s&flags=%s" % (ip,email,flags)
-                            #request_obj = urllib2.Request(ipintel_api_link,data=None, headers={'User-Agent': 'Mozilla'})
-                            #ipintel_response = urllib2.urlopen(request_obj).read().decode('utf-8')
-                           # proxy_data = str(ipintel_response)
-                            #print("Proxy Data is : %s") % proxy_data
-                            #print(proxy_data)####################
-                            #if (proxy_data == '1'):
-                            #    proxy = 'Proxy'
-                            #else:
-                            #    proxy = ''
-                            user_info = [ip,country_name,country_code,proxy]
-                            user_info = [s.encode('utf-8') for s in user_info]
-                            mydata[nick] = user_info
-
-
-                            #here query for proxy response and update the variable
-                        except urllib2.HTTPError as err:
-                            print (err.code)
-                            print("Error py2 getting response for geoip")
+                            print("Error py3 getting resonse for geoip")                 
+                        
                     location =""
                     try:                        
                         location = " "+ident +" "+ ip +" "+ country_name +"/"+country_code +" "+ "\00320"+proxy
                     except:
+                        print("Error in trying to setup location")
                         return
                     edited = True
                     chan_context.emit_print("Join", nick_cb, chan, location)
@@ -502,11 +430,6 @@ def on_chan_unban(word,word_eol,event,attr):
 
 def xsqline(word,word_eol, _):
     xsqline_nick = None
-
-    #get the nickname from the clipboard
-    if os.name =="posix":
-        xsqline_nick = pyperclip.paste()
-
     if os.name =="nt":
         xsqline_nick = getclip()
 
@@ -515,7 +438,6 @@ def xsqline(word,word_eol, _):
     #unicode fix
     if(sys.version_info > (3, 0)):
         xsqline_nick = xsqline_nick[2:-1]
-
     #issue an sqline on that nickname
     command = "os sqline add +30d *%s* %s" % (xsqline_nick, sqline_reason)
     hexchat.command(command)
@@ -526,13 +448,8 @@ def xshun_cb(word,word_eol, _):
     xshun_nick = None
     xshun_hooks = []
 
-    #get the nickname from the clipboard
-    if os.name =="posix":
-        xshun_nick = pyperclip.paste()
-
     if os.name =="nt":
-        xshun_nick = getclip()
-        
+        xshun_nick = getclip()        
     xshun_nick = str(xshun_nick)
     if(sys.version_info > (3, 0)):
         xshun_nick = xshun_nick[2:-1]
@@ -566,10 +483,6 @@ def xline_cb(word,word_eol, _):
     xline_nick = None
     xline_timer_handle = None
     xline_hooks = []
-
-    #get the nickname from the clipboard
-    if os.name =="posix":
-        xline_nick = pyperclip.paste()
 
     if os.name =="nt":
         xline_nick = getclip()
@@ -619,5 +532,6 @@ TODO
 
 Add keyboard shortcuts inside this plugin if possible.
 Move GeoIP checking to a local DB instead of using a web API.
+Add country to whois info
 
 '''
