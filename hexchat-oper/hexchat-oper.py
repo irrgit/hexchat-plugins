@@ -207,7 +207,7 @@ def on_chan_join(word,word_eol,event, attr):
                 additional_info = user_info[3]
             if 'Proxy' in user_info[3]:
                 additional_info = user_info[3]
-        location = " "+ ident +" "+ ip_from_data +" " + country_name +"/"+ country_code +" "+ additional_info
+        location = " "+ ident +" "+ ip_from_data +" " + "\00320" +country_name +"/"+ "\00320" + country_code +" "+ "\00320" + additional_info
         edited = True
         chan_context.emit_print("Join",nick,chan,location)
         edited = False
@@ -262,16 +262,8 @@ def on_chan_join(word,word_eol,event, attr):
                             user_info = [ip,country_name,country_code,'Exempt']
                             mydata[nick] = user_info
                         except:
-                            print("error py3 getting response") 
-                    else:
-                        try:
-                            country_code = gi.country_code_by_addr(ip)  
-                            country_name = gi.country_name_by_addr(ip)
-                            user_info = [ip,country_name,country_code,'Exempt']
-                            user_info = user_info = [s.encode('utf-8') for s in user_info]
-                            mydata[nick] = user_info
-                        except:
-                            print("Error py2 getting response for exempt")
+                            print("Error getting country info from GeoIP DB.")
+
                     location = " "+ident +" "+ ip +" "+ country_name +"/"+ country_code + " "+ "\00320Exempt"
                     edited = True
                     chan_context.emit_print("Join",nick_cb,chan,location)
@@ -303,7 +295,7 @@ def on_chan_join(word,word_eol,event, attr):
 
                         except HTTPError as err:
                             print(err.code)
-                            print("Error py3 getting resonse for geoip")                 
+                            print("Error trying to get Proxy Info from external API")                 
                         
                     location =""
                     try:                        
@@ -326,16 +318,12 @@ def on_chan_join(word,word_eol,event, attr):
         timer_handle = hexchat.hook_timer(1000, onjoin_timeout_cb)
         return hexchat.EAT_ALL
 
-
-
-
 def match_mask(mask, searchmask ):
     if searchmask is None:
         searchmask = ''
     for match, repl in wildcards.items():
         mask = mask.replace(match,repl)
-    return bool(re.match(mask,searchmask,re.IGNORECASE))
-        
+    return bool(re.match(mask,searchmask,re.IGNORECASE))       
 
 
 def get_user_list(context):
