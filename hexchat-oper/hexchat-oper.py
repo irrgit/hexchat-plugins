@@ -207,7 +207,7 @@ def on_chan_join(word,word_eol,event, attr):
                 additional_info = user_info[3]
             if 'Proxy' in user_info[3]:
                 additional_info = user_info[3]
-        location = " "+ ident +" "+ ip_from_data +" " + "\00320" +country_name +"/"+ "\00320" + country_code +" "+ "\00320" + additional_info
+        location = " "+ ident +" "+ ip_from_data +" " + "\00318" +country_name +"/"+ "\00318" + country_code +" "+ "\00320" + additional_info
         edited = True
         chan_context.emit_print("Join",nick,chan,location)
         edited = False
@@ -264,7 +264,7 @@ def on_chan_join(word,word_eol,event, attr):
                         except:
                             print("Error getting country info from GeoIP DB.")
 
-                    location = " "+ident +" "+ ip +" "+ country_name +"/"+ country_code + " "+ "\00320Exempt"
+                    location = " "+ident +" "+ ip +" "+ "\00318"+ country_name +"/"+ "\00318"+ country_code + " "+ "\00320Exempt"
                     edited = True
                     chan_context.emit_print("Join",nick_cb,chan,location)
                     edited = False
@@ -299,7 +299,7 @@ def on_chan_join(word,word_eol,event, attr):
                         
                     location =""
                     try:                        
-                        location = " "+ident +" "+ ip +" "+ country_name +"/"+country_code +" "+ "\00320"+proxy
+                        location = " "+ident +" "+ ip +" "+ "\00318"+ country_name +"/"+ "\00318"+country_code +" "+ "\00320"+proxy
                     except:
                         print("Error in trying to setup location")
                         return
