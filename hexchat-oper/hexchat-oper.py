@@ -3,16 +3,12 @@ __module_version__ = "2.1"
 __module_description__ = "Python 3 Windows"
 import os
 import sys
-# path = str((os.getcwd()))
-# sys.path.insert(0,path)
-# print(path)
 import hexchat
 import threading
 sys.path.append(os.path.join(os.path.dirname("__file__"), "extras"))
 path = os.path.join(os.path.dirname("__file__"), "extras")
 geoip_dat = os.path.join(path,"GeoIP" + "." + 'dat')
 import pygeoip
-
 if(sys.version_info > (3, 0)):
     import urllib.request
     from urllib.error import HTTPError
