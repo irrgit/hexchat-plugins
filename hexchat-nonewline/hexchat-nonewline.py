@@ -1,5 +1,5 @@
 __module_name__ = "hexchat-nonewline"
-__module_version__ = "0.1"
+__module_version__ = "0.4"
 __module_description__ = "Remove newlines"
 
 
@@ -13,8 +13,8 @@ def nonewline(word, word_eol, userdata):
 
 	text = hexchat.get_info('inputbox')
 
-	if '\n' in text:
-		newtext = text.replace("\n"," ")
+	if "\n" in text:
+		newtext = text.replace("\n"," ").rstrip()
 		hexchat.command('settext {}'.format(newtext))
 	else:
 		return
