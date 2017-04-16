@@ -13,11 +13,11 @@ def nonewline(word, word_eol, userdata):
 
 	text = hexchat.get_info('inputbox')
 
-	if '\n' not in text:
+	if '\n' in text:
+		newtext = text.replace("\n"," ")
+		hexchat.command('settext {}'.format(newtext))
+	else:
 		return
-
-	text = text.replace("\n"," ")
-	hexchat.command('settext {}'.format(text))
 
 hexchat.hook_print("Key Press",nonewline)
 
