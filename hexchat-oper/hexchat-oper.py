@@ -32,10 +32,7 @@ akill_time = '+2d' #2 days
 akill_reason ='Proxy/Ofendime/Flood/Abuse'
 sqline_reason = 'Nick/Banal'
 check_proxy = False # set to check each IP if its a proxy, Warning this could get slow
-
-
 edited = False
-
 #Channel Ban text event 
 edited_ban = False
 #Channel UnBan text event 
@@ -44,6 +41,45 @@ edited_unban = False
 wildcards = {'?':r'.', '*': r'.*'}
 
 mydata = {}
+
+#these will be the network tabs to print to.
+TABS = [
+r'{CONNECTIONS}', 
+r'{OVERRIDES}' ,
+r'{SPAMFILTER}',
+r'{NICKCHANGES}'
+]
+filter_tabs = True
+network_contexts = []
+
+def open_tabs():
+    server_context = hexchat.get_info("server")
+    tab_options = hexchat.get_prefs('tab_new_to_front')
+    hexchat.command("set -quiet tab_new_to_front 0")
+    
+    for tab in TABS:
+        hexchat.command("NEWSERVER -noconnect %s" % tab)
+
+open_tabs()
+
+network_contexts =[hexchat.find_context(tab) for tab in TABS]
+
+def pad_nick(nick):
+    nick = (nick + " " *30)[:30]
+    return nick
+
+TEXT =  {
+    'blue': '\00318',
+    'green': '\00319',
+    'red': '\00320',
+    'brown': '\00321',
+    'purple': '\00322',
+    'orange': '\00323',
+    'lightgreen': '\00325',
+    'gray': '\00330',
+    'bold':'\002',
+    'underline':'\037'
+}
 
 IRCCloud = [
 '192.184.9.108' ,
@@ -95,6 +131,7 @@ def getclip():
 
 
 
+
 def get_data_py3(nick,ip):
     
     try:
@@ -134,12 +171,30 @@ def on_server_join(word,word_eol,userdata):
             user_info = [ip,'Mibbit','US']
             mydata[nickname] = user_info
         else:
-            if(sys.version_info > (3, 0)):
-                send_to_thread = threading.Thread(target=get_data_py3,args=(nickname,ip,))
-                send_to_thread.start()
+            send_to_thread = threading.Thread(target=get_data_py3,args=(nickname,ip,))
+            send_to_thread.start()
+
+        # Print to appropriate tab
+        try:
+            server = TEXT['underline'] + TEXT['lightgreen'] + str(re.findall(r"at (\ ?.*)\:",notice)).strip("[]'")
+            nickname = TEXT['bold']+TEXT['blue']+ str(re.findall(r"\: (.*)\ \(",notice)).strip("[]'")
+            ip = TEXT['orange'] + str(re.findall(r"\@(.*)\)",notice)).strip("[]'")
+            if server:
+                msg = pad_nick(nickname) +TEXT['gray']+" from "+ ip +" at "+ server
             else:
-                send_to_thread = threading.Thread(target=get_data_py2, args=(nickname,ip,))
-                send_to_thread.start()
+                msg = pad_nick(nickname) +TEXT['gray']+" from "+ ip
+
+            connected = TEXT['green'] + 'Connected'
+            conn_tab = hexchat.find_context(r'{CONNECTIONS}')
+            if conn_tab:
+                conn_tab.emit_print("Channel Message", connected, msg)
+            else:
+                return
+
+
+        except:
+            print("Error when trying to print to filter tab")
+
         return
 
     elif 'Client exiting' in notice:
@@ -149,6 +204,12 @@ def on_server_join(word,word_eol,userdata):
             mydata.pop(nickname, None)
         else:
             print("Not in the dictionary")
+
+        server = TEXT['underline'] + TEXT['red'] + str(re.findall(r"at (\ ?.*)\:",notice)).strip("[]'")
+        nickname = TEXT['bold']+TEXT['blue']+ str(re.findall(r"at .*\:\ (.*)\!\w|exiting\: (.*)\ \(",notice)).strip("[]'")
+
+
+
         return
 
     elif 'forced to change his/her nickname' in notice:
@@ -162,8 +223,8 @@ def on_server_join(word,word_eol,userdata):
             if(sys.version_info > (3, 0)):
                 send_to_thread = threading.Thread(target=get_data_py3,args=(newnick,ip,))
                 send_to_thread.start()
-
         return
+
     elif 'has changed his/her nickname' in notice:
         ip = re.findall(r"@([^)]+)",notice)[0]
         oldnick = re.findall(r"-- ([^()]+) ",notice)[0]
@@ -177,6 +238,8 @@ def on_server_join(word,word_eol,userdata):
                 send_to_thread = threading.Thread(target=get_data_py3, args=(newnick,ip,))
                 send_to_thread.start()
         return
+
+
     else:
         return 
         
