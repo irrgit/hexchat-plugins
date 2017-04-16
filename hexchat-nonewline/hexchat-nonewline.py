@@ -11,9 +11,14 @@ def nonewline(word, word_eol, userdata):
 	if not word[0] == '65293': # Enter
 		return
 
-	text = hexchat.get_info('inputbox').replace("\n"," ")
+	text = hexchat.get_info('inputbox')
+
+	if '\n' not in text:
+		return
+
+	text = text.replace("\n"," ")
 	hexchat.command('settext {}'.format(text))
-	
+
 hexchat.hook_print("Key Press",nonewline)
 
 print(__module_name__ +" version "  + __module_version__ +  " loaded.")
